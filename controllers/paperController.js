@@ -71,7 +71,7 @@ const assignPaperToReviewer = async (req, res) => {
         await getRepository(Paper_Reviewer).save(assignment);
         res.status(201).json({message: "assigned successfully"});
     } else {
-        throw new Error('User is not a reviewer or does not exist.');
+        res.status(422).json({message: 'User is not a reviewer or does not exist.'});
     }
 }
 
