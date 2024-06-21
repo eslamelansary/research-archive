@@ -48,6 +48,7 @@ const uploadPaper = async (req, res) => {
             filePath: file.originalname,
             topic: null,
             authorId: user.id,
+            authorName: user.name,
             status: paperStatus.PENDING
         });
         await paperRepository.save(paper);

@@ -3,7 +3,7 @@
   "host": "localhost",
   "port": 3306,
   "username": "root",
-  "password": "Acegik22",
+  "password": "p@$$w0rd",
   "database": "journal_system",
   "synchronize": true,
   "logging": false,

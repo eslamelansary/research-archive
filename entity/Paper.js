@@ -33,6 +33,9 @@ module.exports = new EntitySchema({
         authorId: {
             type: 'int'
         },
+        authorName:{
+            type: 'varchar'
+        },
         status: {
             type: 'enum',
             enum: Object.values(paperStatus),

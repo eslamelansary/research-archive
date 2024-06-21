@@ -1,10 +1,7 @@
 node_modules
-# Default ignored files
 /shelf/
 /workspace.xml
-# Editor-based HTTP Client requests
 /httpRequests/
+/ormconfig.json
 ormconfig.json
 package-lock.json
-
-/uploads
