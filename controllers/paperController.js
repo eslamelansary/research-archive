@@ -33,13 +33,10 @@ const uploadPaper = async (req, res) => {
             }
         });
 
-        // Check if topic and user exist
         if (!user) {
             return res.status(400).json({message: 'Invalid topic or user'});
         }
 
-        console.log("hello")
-        // Save paper details to the database
         const now = new Date();
         const paper = paperRepository.create({
             name: file.originalname,
@@ -52,12 +49,6 @@ const uploadPaper = async (req, res) => {
             status: paperStatus.PENDING
         });
         await paperRepository.save(paper);
-
-        // Move file to 'to-be-processed' directory
-        const processedFileName = `${file.originalname}-tobeprocessed.txt`;
-        const processedFilePath = path.join('to-be-processed', processedFileName);
-        // fs.renameSync(file.path, processedFilePath);
-
         res.status(201).json({message: 'Paper uploaded successfully'});
     } catch (error) {
         console.error('Error uploading paper:', error);
