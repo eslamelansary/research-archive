@@ -32,13 +32,4 @@ createConnection()
     app.listen(port, () => {
       console.log(`Server is running on http://localhost:${port}`);
     });
-  })
-  .catch((error) => console.log(error));
-
-function s(err, req, res, next) {
-  // Extract the error message from the error object
-  const errorMessage = err.message || "Internal Server Error";
-  res.status(500).json({ message: errorMessage });
-}
-
-}).catch(error => console.log(error));
+  }).catch((error) => console.log(error));
