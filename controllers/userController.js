@@ -2,8 +2,6 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const {getRepository} = require('typeorm');
 const User = require('../entity/User');
-const Paper = require('../entity/Paper');
-const Paper_Reviewer = require("../entity/Paper_Reviewer");
 
 async function createUser(userData, req, res) {
     const userRepository = getRepository(User);
@@ -22,7 +20,7 @@ async function createUser(userData, req, res) {
 
 const signup = async (req, res) => {
     const authorData = req.body;
-    authorData.role = 'editor';
+    authorData.role = 'author';
     await createUser(authorData, req, res);
     await signin(req, res);
 };
@@ -106,4 +104,5 @@ module.exports = {
     getUserById,
     updateUser,
     deleteUser,
+    createUser
 }

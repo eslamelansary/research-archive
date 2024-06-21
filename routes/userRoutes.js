@@ -22,7 +22,7 @@ router.post('/signin', async (req, res, next) => {
 router.use(authenticateUser);
 router.post('/create', async (req, res, next) => {
     try {
-        await userController.signup(req, res);
+        await userController.createUser(req, res);
     } catch (error) {
         next(error);
     }
