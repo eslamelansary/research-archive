@@ -35,7 +35,10 @@ exports.signin = async (req, res) => {
     const {username, password} = req.body;
 
     try {
-        const user = await userRepository.findOne({where: {username}});
+        const user = await userRepository.findOne({
+            select:{ id: true, username: true, password: true, role: true },
+            where: {username}
+        });
 
         if (!user || !(await bcrypt.compare(password, user.password))) {
             return res.status(401).json({message: 'Invalid credentials'});
@@ -95,3 +98,11 @@ exports.deleteUser = async (req, res) => {
     await userRepository.delete(user.id);
     res.json({message: 'User deleted successfully'});
 };
+
+exports.getUserWhere = async (req, res) => {
+    const userRepository = getRepository(User);
+    const user = await userRepository.findOne({
+        where: {role: req.body.role}
+    });
+    res.json(user);
+}

@@ -60,4 +60,11 @@ router.delete('/:id', async (req, res, next) => {
     }
 });
 
+router.get('/roles', async (req, res, next) => {
+    try {
+        await userController.getUserWhere(req, res);
+    } catch (error) {
+        next(error);
+    }
+});
 module.exports = router;
