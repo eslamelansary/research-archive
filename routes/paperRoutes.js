@@ -28,8 +28,9 @@ const upload = multer({
 });
 
 router.use(authenticateUser);
-
 // Endpoint for uploading papers
+router.get('/:id', paperController.getPaperById)
+router.get('/', paperController.getAllPapers)
 router.post('/upload', upload.single('file'), paperController.uploadPaper);
-
+router.post('/assign', paperController.assignPaperToReviewer);
 module.exports = router;

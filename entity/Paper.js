@@ -26,8 +26,8 @@ module.exports = new EntitySchema({
         filePath: {
             type: 'varchar'
         },
-        topicId: {
-            type: 'int',
+        topic: {
+            type: 'varchar',
             default: null,
         },
         authorId: {

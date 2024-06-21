@@ -2,6 +2,8 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const {getRepository} = require('typeorm');
 const User = require('../entity/User');
+const Paper = require('../entity/Paper');
+const Paper_Reviewer = require("../entity/Paper_Reviewer");
 
 async function createUser(userData, req, res) {
     const userRepository = getRepository(User);
@@ -98,16 +100,6 @@ const getUserWhere = async (req, res) => {
     res.json(user);
 }
 
-const assignPaperToReviewer = async (req, res) => {
-    // const reviewerRepository = getRepository(Reviewer);
-    // const reviewer = await reviewerRepository.findOne({
-    //     where: {userId: req.params.id}
-    // });
-    // reviewerRepository.merge(reviewer, req.body);
-    // await reviewerRepository.save(reviewer);
-    // res.json({message: 'Reviewer updated successfully'});
-};
-
 module.exports = {
     signup,
     signin,
@@ -116,5 +108,4 @@ module.exports = {
     getUserById,
     updateUser,
     deleteUser,
-    assignPaperToReviewer
 }

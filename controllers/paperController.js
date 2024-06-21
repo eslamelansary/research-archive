@@ -3,8 +3,9 @@ const fs = require('fs');
 const path = require('path');
 const User = require('../entity/User');
 const Paper = require('../entity/Paper');
+const Paper_Reviewer = require("../entity/Paper_Reviewer");
 
-exports.uploadPaper = async (req, res) => {
+const uploadPaper = async (req, res) => {
     try {
         // Check if a file was uploaded
         const file = req.file;
@@ -48,3 +49,49 @@ exports.uploadPaper = async (req, res) => {
         res.status(500).json({message: 'Internal Server Error'});
     }
 };
+
+const assignPaperToReviewer = async (req, res) => {
+    const {userId, paperId} = req.body;
+    const user = await getRepository(User).findOne({
+        where: {
+            id: userId
+        }
+    });
+
+    if (user && user.role === 'reviewer') {
+        // Create a new assignment
+        const assignment = {};
+        assignment.reviewer = user;
+        assignment.paper = await getRepository(Paper).findOne({
+            where: {
+                id: paperId
+            }
+        });
+
+        await getRepository(Paper_Reviewer).save(assignment);
+        res.status(201).json({message: "assigned successfully"});
+    } else {
+        throw new Error('User is not a reviewer or does not exist.');
+    }
+}
+
+const getAllPapers = async (req, res) => {
+    const paperRepository = getRepository(Paper);
+    const papers = await paperRepository.find();
+    res.json(papers);
+};
+
+const getPaperById = async (req, res) => {
+    const paperRepository = getRepository(Paper);
+    const paper = await paperRepository.findOne({
+        where: {id: req.params.id}
+    });
+    res.json(paper);
+};
+
+module.exports = {
+    uploadPaper,
+    assignPaperToReviewer,
+    getAllPapers,
+    getPaperById
+}
