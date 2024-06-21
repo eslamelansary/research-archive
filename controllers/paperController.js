@@ -38,6 +38,7 @@ const uploadPaper = async (req, res) => {
             return res.status(400).json({message: 'Invalid topic or user'});
         }
 
+        console.log("hello")
         // Save paper details to the database
         const now = new Date();
         const paper = paperRepository.create({

@@ -6,3 +6,5 @@ node_modules
 /httpRequests/
 ormconfig.json
 package-lock.json
+
+/uploads
