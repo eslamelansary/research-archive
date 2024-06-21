@@ -60,7 +60,9 @@ const assignPaperToReviewer = async (req, res) => {
 
     if (user && user.role === 'reviewer') {
         // Create a new assignment
-        const assignment = {};
+        const assignment = {
+            assignedAt: new Date()
+        }
         assignment.reviewer = user;
         assignment.paper = await getRepository(Paper).findOne({
             where: {
