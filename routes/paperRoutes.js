@@ -10,7 +10,7 @@ const storage = multer.diskStorage({
         cb(null, 'uploads/');
     },
     filename: (req, file, cb) => {
-        cb(null, `${Date.now()}-${file.originalname}`);
+        cb(null, `${file.originalname}`);
     }
 });
 
@@ -27,9 +27,8 @@ const upload = multer({
     fileFilter: fileFilter
 });
 
-router.post('/upload', upload.single('file'), paperController.uploadPaper);
 router.use(authenticateUser);
-// Endpoint for uploading papers
+router.post('/upload', upload.single('file'), paperController.uploadPaper);
 router.get('/:id', paperController.getPaperById)
 router.get('/', paperController.getAllPapers)
 router.post('/assign', paperController.assignPaperToReviewer);

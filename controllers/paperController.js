@@ -5,6 +5,12 @@ const User = require('../entity/User');
 const Paper = require('../entity/Paper');
 const Paper_Reviewer = require("../entity/Paper_Reviewer");
 
+const paperStatus = {
+    DOWNLOADED: 'downloaded',
+    PENDING: 'pending review',
+    REVIEWED: 'reviewed'
+}
+
 const uploadPaper = async (req, res) => {
     try {
         // Check if a file was uploaded
@@ -19,9 +25,13 @@ const uploadPaper = async (req, res) => {
 
         // Extract data from request body
         const requestBody = req.body;
-
         // Find topic and user
-        const user = await userRepository.findOne({id: req.user.id, role: 'author'});
+        const user = await userRepository.findOne({
+            where: {
+                id: req.user.userId,
+                role: 'author'
+            }
+        });
 
         // Check if topic and user exist
         if (!user) {
@@ -30,18 +40,21 @@ const uploadPaper = async (req, res) => {
 
         // Save paper details to the database
         const now = new Date();
-        const paper = new paperRepository.create({
-                name: file.originalname.name,
-                createdAt: now,
-                updatedAt: now
-            }
-        );
+        const paper = paperRepository.create({
+            name: file.originalname,
+            createdAt: now,
+            updatedAt: now,
+            filePath: file.originalname,
+            topic: null,
+            authorId: user.id,
+            status: paperStatus.PENDING
+        });
         await paperRepository.save(paper);
 
         // Move file to 'to-be-processed' directory
         const processedFileName = `${file.originalname}-tobeprocessed.txt`;
         const processedFilePath = path.join('to-be-processed', processedFileName);
-        fs.renameSync(file.path, processedFilePath);
+        // fs.renameSync(file.path, processedFilePath);
 
         res.status(201).json({message: 'Paper uploaded successfully'});
     } catch (error) {
