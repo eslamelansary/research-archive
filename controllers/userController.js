@@ -27,7 +27,9 @@ async function createUser(userData, req, res) {
 }
 
 exports.signup = async (req, res) => {
-    await createUser(req.body, req, res);
+    const authorData = req.body;
+    authorData.role = 'author';
+    await createUser(authorData, req, res);
 };
 
 exports.signin = async (req, res) => {
@@ -102,7 +104,7 @@ exports.deleteUser = async (req, res) => {
 exports.getUserWhere = async (req, res) => {
     const userRepository = getRepository(User);
     const user = await userRepository.findOne({
-        where: {role: req.body.role}
+        where: { role: "reviewer" }
     });
     res.json(user);
 }
