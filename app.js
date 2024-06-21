@@ -9,7 +9,7 @@ const port = 8000;
 const cors = require("cors");
 
 logger.add(new logger.transports.Console());
-app.use(cors);
+app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(loggerMiddleware);
