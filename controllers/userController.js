@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const {getRepository} = require('typeorm');
 const User = require('../entity/User');
 const Reviewer = require('../entity/Reviewer');
+const {roleEnum} = require("../entity/User");
 
 async function createUser(userData, req, res) {
     const userRepository = getRepository(User);
@@ -104,7 +105,7 @@ exports.deleteUser = async (req, res) => {
 exports.getUserWhere = async (req, res) => {
     const userRepository = getRepository(User);
     const user = await userRepository.findOne({
-        where: { role: "reviewer" }
+        where: { role: req.body.role }
     });
     res.json(user);
 }

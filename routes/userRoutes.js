@@ -28,6 +28,14 @@ router.post('/create', async (req, res, next) => {
     }
 });
 
+router.get('/roles', async (req, res, next) => {
+    try {
+        await userController.getUserWhere(req, res);
+    } catch (error) {
+        next(error);
+    }
+});
+
 router.get('/', async (req, res, next) => {
     try {
         await userController.getUsers(req, res);
@@ -60,11 +68,4 @@ router.delete('/:id', async (req, res, next) => {
     }
 });
 
-router.get('/roles', async (req, res, next) => {
-    try {
-        await userController.getUserWhere(req, res);
-    } catch (error) {
-        next(error);
-    }
-});
 module.exports = router;
