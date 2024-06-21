@@ -4,7 +4,7 @@ const {authenticateUser} = require("../middlewares/authMiddleware");
 const topicController = require("../controllers/topicController");
 
 router.use(authenticateUser);
-router.post('/create', async (req, res, next) => {
+router.post('/', async (req, res, next) => {
     try {
         await topicController.add(req, res);
     } catch (error) {
@@ -14,8 +14,18 @@ router.post('/create', async (req, res, next) => {
 
 router.delete('/:id', async (req, res, next) => {
     try {
-        await topicController.delete(req, res);
+        await topicController.deleteTopic(req, res);
     } catch (error) {
         next(error);
     }
 });
+
+router.get('/', async (req, res, next) => {
+    try {
+        await topicController.findAll(req, res);
+    } catch (error) {
+        next(error);
+    }
+});
+
+module.exports = router;
