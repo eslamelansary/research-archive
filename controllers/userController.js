@@ -24,16 +24,17 @@ async function createUser(userData, req, res) {
         const newReviewer = reviewerRepository.create({userId: newUser.id});
         await reviewerRepository.save(newReviewer);
     }
-    res.status(201).json({message: 'User created successfully'});
+    // res.status(201).json({message: 'User created successfully'});
+    await signin(req, res);
 }
 
-exports.signup = async (req, res) => {
+const signup = async (req, res) => {
     const authorData = req.body;
     authorData.role = 'author';
     await createUser(authorData, req, res);
 };
 
-exports.signin = async (req, res) => {
+const signin = async (req, res) => {
     const userRepository = getRepository(User);
     const {username, password} = req.body;
 
@@ -48,20 +49,20 @@ exports.signin = async (req, res) => {
         }
 
         const token = jwt.sign({userId: user.id, role: user.role}, process.env.SECRET, {expiresIn: '1h'});
-        res.status(200).json({message: 'Logged in successfully', token});
+        res.status(200).json({message: 'Logged in successfully', user, token});
     } catch (error) {
         console.error('Error during sign-in:', error);
         res.status(500).json({message: 'Internal Server Error'});
     }
 };
 
-exports.getUsers = async (req, res) => {
+const getUsers = async (req, res) => {
     const userRepository = getRepository(User);
     const users = await userRepository.find();
     res.json(users);
 };
 
-exports.getUserById = async (req, res) => {
+const getUserById = async (req, res) => {
     const userRepository = getRepository(User);
     const user = await userRepository.findOne({
         where: {id: req.params.id}
@@ -69,7 +70,7 @@ exports.getUserById = async (req, res) => {
     res.json(user);
 };
 
-exports.updateUser = async (req, res) => {
+const updateUser = async (req, res) => {
     const userRepository = getRepository(User);
     const user = await userRepository.findOne({
         where: {id: req.params.id}
@@ -79,7 +80,7 @@ exports.updateUser = async (req, res) => {
     res.json({message: 'User updated successfully'});
 };
 
-exports.deleteUser = async (req, res) => {
+const deleteUser = async (req, res) => {
     const userRepository = getRepository(User);
     const reviewerRepository = getRepository(Reviewer);
 
@@ -102,10 +103,20 @@ exports.deleteUser = async (req, res) => {
     res.json({message: 'User deleted successfully'});
 };
 
-exports.getUserWhere = async (req, res) => {
+const getUserWhere = async (req, res) => {
     const userRepository = getRepository(User);
     const user = await userRepository.findOne({
         where: { role: req.body.role }
     });
     res.json(user);
+}
+
+module.exports = {
+    signup,
+    signin,
+    getUsers,
+    getUserWhere,
+    getUserById,
+    updateUser,
+    deleteUser
 }
