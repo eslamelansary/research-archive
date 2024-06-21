@@ -2,7 +2,8 @@ const { EntitySchema } = require('typeorm');
 
 const roleEnum=  {
     REVIEWER: 'reviewer',
-    AUTHOR: 'author'
+    AUTHOR: 'author',
+    EDITOR: 'editor',
 }
 
 module.exports = new EntitySchema({
