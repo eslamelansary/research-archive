@@ -2,6 +2,7 @@ const { EntitySchema } = require('typeorm');
 const paperStatus = {
     DOWNLOADED: 'downloaded',
     PENDING: 'pending review',
+    ACCEPTED: 'accepted',
     REVIEWED: 'reviewed'
 }
 
@@ -34,7 +35,7 @@ module.exports = new EntitySchema({
             type: 'int'
         },
         authorName:{
-            type: 'varchar'
+            type: 'varchar',
         },
         status: {
             type: 'enum',
