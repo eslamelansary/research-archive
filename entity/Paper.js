@@ -9,6 +9,12 @@ module.exports = new EntitySchema({
     name: 'Paper',
     tableName: 'papers',
     columns: {
+        createdAt: {
+            type: 'timestamp',
+        },
+        updatedAt:{
+            type: 'timestamp',
+        },
         id: {
             primary: true,
             type: 'int',
@@ -31,9 +37,6 @@ module.exports = new EntitySchema({
             type: 'enum',
             enum: Object.values(paperStatus),
             default: paperStatus.PENDING
-        },
-        createdAt: {
-            type: 'timestamp',
         }
     }
 });

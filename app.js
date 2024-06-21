@@ -21,14 +21,10 @@ createConnection().then(async connection => {
     // Routes
     const userRoutes = require('./routes/userRoutes');
     const paperRoutes = require('./routes/paperRoutes');
-    const topicRoutes = require('./routes/topicRoutes');
-    const reviewerRoutes = require('./routes/reviewerRoutes');
 
     app.use('/users', userRoutes);
     app.use('/papers', paperRoutes);
-    app.use('/topics', topicRoutes);
-    app.use('/reviewers', reviewerRoutes);
-    app.use('/', (req, res) => {    
+    app.use('/', (req, res) => {
         res.send("`Server is running!")
     })    
     app.listen(port, () => {

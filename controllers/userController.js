@@ -2,7 +2,6 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const {getRepository} = require('typeorm');
 const User = require('../entity/User');
-const Reviewer = require('../entity/Reviewer');
 
 async function createUser(userData, req, res) {
     const userRepository = getRepository(User);
@@ -17,12 +16,7 @@ async function createUser(userData, req, res) {
     // Create the user
     const newUser = userRepository.create({username, password: hashedPassword, role});
     await userRepository.save(newUser);
-    // If the user's role is "reviewer", create a corresponding Reviewer entry
-    if (role === 'reviewer') {
-        const reviewerRepository = getRepository(Reviewer);
-        const newReviewer = reviewerRepository.create({userId: newUser.id});
-        await reviewerRepository.save(newReviewer);
-    }
+
     // res.status(201).json({message: 'User created successfully'});
     await signin(req, res);
 }
@@ -81,7 +75,6 @@ const updateUser = async (req, res) => {
 
 const deleteUser = async (req, res) => {
     const userRepository = getRepository(User);
-    const reviewerRepository = getRepository(Reviewer);
 
     // Find the user by ID
     const user = await userRepository.findOne({
@@ -90,11 +83,6 @@ const deleteUser = async (req, res) => {
 
     if (!user) {
         return res.status(404).json({message: 'User not found'});
-    }
-
-    // If the user is a reviewer, delete the corresponding reviewer entry
-    if (user.role === 'reviewer') {
-        await reviewerRepository.delete({userId: user.id});
     }
 
     // Delete the user
@@ -110,6 +98,16 @@ const getUserWhere = async (req, res) => {
     res.json(user);
 }
 
+const assignPaperToReviewer = async (req, res) => {
+    // const reviewerRepository = getRepository(Reviewer);
+    // const reviewer = await reviewerRepository.findOne({
+    //     where: {userId: req.params.id}
+    // });
+    // reviewerRepository.merge(reviewer, req.body);
+    // await reviewerRepository.save(reviewer);
+    // res.json({message: 'Reviewer updated successfully'});
+};
+
 module.exports = {
     signup,
     signin,
@@ -117,5 +115,6 @@ module.exports = {
     getUserWhere,
     getUserById,
     updateUser,
-    deleteUser
+    deleteUser,
+    assignPaperToReviewer
 }

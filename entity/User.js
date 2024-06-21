@@ -26,13 +26,5 @@ module.exports = new EntitySchema({
             type: 'enum',
             enum: roleEnum,
         }
-    },
-    relations: {
-        reviewer: {
-            target: 'Reviewer',
-            type: 'one-to-one',
-            inverseSide: 'user',
-            joinColumn: true
-        }
     }
 });

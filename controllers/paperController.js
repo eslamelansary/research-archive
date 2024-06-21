@@ -1,7 +1,6 @@
 const {getRepository} = require('typeorm');
 const fs = require('fs');
 const path = require('path');
-const Topic = require('../entity/Topic');
 const User = require('../entity/User');
 const Paper = require('../entity/Paper');
 
@@ -15,19 +14,16 @@ exports.uploadPaper = async (req, res) => {
 
         // Retrieve necessary repositories
         const paperRepository = getRepository(Paper);
-        const topicRepository = getRepository(Topic);
         const userRepository = getRepository(User);
 
         // Extract data from request body
         const requestBody = req.body;
-        const {topicId} = requestBody;
 
         // Find topic and user
-        const topic = await topicRepository.findOne(topicId);
         const user = await userRepository.findOne({id: req.user.id, role: 'author'});
 
         // Check if topic and user exist
-        if (!topic || !user) {
+        if (!user) {
             return res.status(400).json({message: 'Invalid topic or user'});
         }
 
@@ -35,7 +31,8 @@ exports.uploadPaper = async (req, res) => {
         const now = new Date();
         const paper = new paperRepository.create({
                 name: file.originalname.name,
-                createdAt: now
+                createdAt: now,
+                updatedAt: now
             }
         );
         await paperRepository.save(paper);
