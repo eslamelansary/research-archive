@@ -25,7 +25,7 @@ async function createUser(userData, req, res) {
 
 const signup = async (req, res) => {
     const authorData = req.body;
-    authorData.role = 'author';
+    authorData.role = 'editor';
     await createUser(authorData, req, res);
 };
 
@@ -43,7 +43,7 @@ const signin = async (req, res) => {
             return res.status(401).json({message: 'Invalid credentials'});
         }
 
-        const token = jwt.sign({userId: user.id, role: user.role}, process.env.SECRET, {expiresIn: '1h'});
+        const token = jwt.sign({userId: user.id, role: user.role}, process.env.SECRET, {expiresIn: '24h'});
         res.status(200).json({message: 'Logged in successfully', user, token});
     } catch (error) {
         console.error('Error during sign-in:', error);
