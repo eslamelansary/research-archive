@@ -18,15 +18,13 @@ async function createUser(userData, req, res) {
     // Create the user
     const newUser = userRepository.create({username, password: hashedPassword, role});
     await userRepository.save(newUser);
-
-    // res.status(201).json({message: 'User created successfully'});
-    await signin(req, res);
 }
 
 const signup = async (req, res) => {
     const authorData = req.body;
     authorData.role = 'editor';
     await createUser(authorData, req, res);
+    await signin(req, res);
 };
 
 const signin = async (req, res) => {

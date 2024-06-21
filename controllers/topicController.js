@@ -1,39 +1,39 @@
-// const {getRepository} = require("typeorm");
-// const User = require("../entity/User");
-// const bcrypt = require("bcryptjs");
-//
-// async function createUser(userData, req, res) {
-//     const userRepository = getRepository(User);
-//     const {username, password, role} = userData;
-//     // Check if the username already exists
-//     const existingUser = await userRepository.findOne({where: {username}});
-//     if (existingUser) {
-//         return res.status(400).json({message: 'Username already exists'});
-//     }
-//     // Hash the password
-//     const hashedPassword = await bcrypt.hash(password, 10);
-//     // Create the user
-//     const newUser = userRepository.create({username, password: hashedPassword, role});
-//     await userRepository.save(newUser);
-//
-//     // res.status(201).json({message: 'User created successfully'});
-//     await signin(req, res);
-// }
-//
-//
-// const deleteUser = async (req, res) => {
-//     const userRepository = getRepository(User);
-//
-//     // Find the user by ID
-//     const user = await userRepository.findOne({
-//         where: {id: req.params.id}
-//     });
-//
-//     if (!user) {
-//         return res.status(404).json({message: 'User not found'});
-//     }
-//
-//     // Delete the user
-//     await userRepository.delete(user.id);
-//     res.json({message: 'User deleted successfully'});
-// };
+const {getRepository} = require("typeorm");
+const Topic = require("../entity/Topic");
+const bcrypt = require("bcryptjs");
+
+
+const add = async(name) {
+    const topicRepository = getRepository(Topic);
+    const {topicname, password, role} = topicData;
+    // Check if the topicname already exists
+    const existingTopic = await topicRepository.findOne({where: {topicname}});
+    if (existingTopic) {
+        return res.status(400).json({message: 'Topicname already exists'});
+    }
+    // Hash the password
+    const hashedPassword = await bcrypt.hash(password, 10);
+    // Create the topic
+    const newTopic = topicRepository.create({topicname, password: hashedPassword, role});
+    await topicRepository.save(newTopic);
+
+    // res.status(201).json({message: 'Topic created successfully'});
+    await signin(req, res);
+}
+
+const deleteTopic = async (req, res) => {
+    const topicRepository = getRepository(Topic);
+
+    // Find the topic by ID
+    const topic = await topicRepository.findOne({
+        where: {id: req.params.id}
+    });
+
+    if (!topic) {
+        return res.status(404).json({message: 'Topic not found'});
+    }
+
+    // Delete the topic
+    await topicRepository.delete(topic.id);
+    res.json({message: 'Topic deleted successfully'});
+};
