@@ -105,7 +105,7 @@ const deleteUser = async (req, res) => {
 
 const getUserWhere = async (req, res) => {
     const userRepository = getRepository(User);
-    const user = await userRepository.findOne({
+    const user = await userRepository.find({
         where: { role: req.body.role }
     });
     res.json(user);
