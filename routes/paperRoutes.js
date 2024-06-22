@@ -44,7 +44,7 @@ router.get('/:id', async (req, res, next) => {
     }
 })
 
-router.get('/', async (req, res, next) => {
+router.post('/', async (req, res, next) => {
     try {
         await paperController.getAllPapers(req, res);
     } catch (e) {
@@ -100,11 +100,4 @@ router.post('/topics-statistics', async (req, res, next) => {
     }
 })
 
-router.post('/my-papers-topic', async (req, res, next) => {
-    try {
-        await paperController.getMyPapersByTopic(req, res);
-    } catch (e) {
-        next(e);
-    }
-})
 module.exports = router;

@@ -26,6 +26,18 @@ module.exports = new EntitySchema({
             type: 'enum',
             enum: roleEnum,
         },
+        total_assigned: {
+            type: 'int',
+            default: 0
+        },
+        total_accepted: {
+            type: 'int',
+            default: 0
+        },
+        total_rejected: {
+            type: 'int',
+            default: 0
+        }
     },
     relations: {
         topics: {

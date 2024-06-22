@@ -78,6 +78,7 @@ const assignPaperToReviewer = async (req, res) => {
         paper.updatedAt = new Date();
         await paperRepository.save(paper);
         user.papers.push(paper);
+        user.total_assigned++;
         await userRepository.save(user);
         res.status(201).json({message: "Assigned successfully"});
     } else {
@@ -86,10 +87,29 @@ const assignPaperToReviewer = async (req, res) => {
 }
 
 const getAllPapers = async (req, res) => {
-    const papers = await paperRepository.find({
-        relations: ['users']
-    });
-    res.json(papers);
+    const topicName = req.body.topicName;
+    if(topicName.length != 0) {
+        const userId = req.user.userId;
+        const user = await userRepository.findOne({
+            where: { id: userId },
+            relations: ['papers', 'topics']
+        });
+
+        const hasTopic = user.topics.some(topic => topic.name === topicName);
+
+        if (!hasTopic) {
+            return res.status(400).json({ message: `The user does not have access to the topic: ${topicName}` });
+        }
+
+        const filteredPapers = user.papers.filter(paper => paper.topic === topicName);
+        res.json(filteredPapers);
+    }
+    else {
+        const papers = await paperRepository.find({
+            relations: ['users']
+        });
+        res.json(papers);
+    }
 };
 
 const getPaperById = async (req, res) => {
@@ -197,6 +217,8 @@ const takeAction = async (req, res) => {
                     paper.status = paperStatus.ACCEPTED;
                     paper.accepting_reviewers = paper.accepting_reviewers || []
                     paper.accepting_reviewers.push({user_id: user.id, username: user.username});
+                    user.total_accepted++;
+                    await user.save(user);
                     await paperRepository.save(paper);
                     return res.status(201).json({message: "Accepted successfully!"});
                 } else {
@@ -238,6 +260,7 @@ const takeAction = async (req, res) => {
                     paper.accepting_reviewers = paper.accepting_reviewers || []
                     paper.accepting_reviewers = paper.accepting_reviewers.filter(u => u.user_id != user.id)
                     user.papers = paper.users.filter(p => p.id != paperId);
+                    user.total_rejected++;
                     await userRepository.save(user)
                     await paperRepository.save(paper);
                     return res.status(201).json({message: "Rejected successfully!"});
@@ -252,25 +275,6 @@ const takeAction = async (req, res) => {
     }
 }
 
-const getMyPapersByTopic = async (req, res) => {
-    const topicName = req.body.topicName;
-    const userId = req.user.userId;
-    const user = await userRepository.findOne({
-        where: { id: userId },
-        relations: ['papers', 'topics']
-    });
-
-    const hasTopic = user.topics.some(topic => topic.name === topicName);
-
-    if (!hasTopic) {
-        return res.status(400).json({ message: `The user does not have access to the topic: ${topicName}` });
-    }
-
-    // const topicNames = user.topics.map(topic => topic.name);
-    const filteredPapers = user.papers.filter(paper => paper.topic === topicName);
-    res.json(filteredPapers);
-}
-
 module.exports = {
     uploadPaper,
     assignPaperToReviewer,
@@ -281,5 +285,4 @@ module.exports = {
     findInDay,
     takeAction,
     getTopicsNumber,
-    getMyPapersByTopic
 }
