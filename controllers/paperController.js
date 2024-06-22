@@ -75,6 +75,7 @@ const assignPaperToReviewer = async (req, res) => {
         }
         const paper = await paperRepository.findOne({where: {id: +paperId}});
         paper.status = paperStatus.PENDING;
+        paper.updatedAt = new Date();
         await paperRepository.save(paper);
         user.papers.push(paper);
         await userRepository.save(user);
@@ -170,13 +171,18 @@ const takeAction = async (req, res) => {
         if (!paper) {
             return res.status(404).json({message: 'paper not found'});
         }
-        if(paper.status === paperStatus.REVIEWED)
-            return res.status(422).json({ message: 'This paper has been reviewed!'});
+        if (paper.status === paperStatus.REVIEWED)
+            return res.status(422).json({message: 'This paper has been reviewed!'});
         const myPaper = paper.users.find(user => user.id === req.user.userId);
         if (myPaper) {
             if (action === 'accept') {
-                if (paper.status == paperStatus.PENDING || paper.status == paperStatus.REJECTED) {
+                if (
+                    (paper.status == paperStatus.PENDING || paper.status == paperStatus.REJECTED) ||
+                    (paper.status == paperStatus.ACCEPTED && paper.accepting_reviewers.length +1 < paper.minimum_reviewers)
+                ) {
                     paper.status = paperStatus.ACCEPTED;
+                    paper.accepting_reviewers = paper.accepting_reviewers || []
+                    paper.accepting_reviewers.push({user_id: user.id, username: user.username});
                     await paperRepository.save(paper);
                     return res.status(201).json({message: "Accepted successfully!"});
                 } else {
@@ -185,10 +191,10 @@ const takeAction = async (req, res) => {
             }
 
             if (action === 'download') {
-                if (paper.status == paperStatus.ACCEPTED) {
+                if (paper.status == paperStatus.ACCEPTED || paper.minimum_reviewers > 1) {
                     paper.status = paperStatus.DOWNLOADED;
                     await paperRepository.save(paper);
-                    return res.status(201).json({message: "Reviewed successfully!"});
+                    return res.status(201).json({message: "Downloaded successfully!"});
                 } else {
                     return res.status(422).json({message: 'you can only download a paper if you have accepted it!'});
                 }
@@ -196,18 +202,27 @@ const takeAction = async (req, res) => {
 
             if (action === 'review') {
                 if (paper.status == paperStatus.DOWNLOADED) {
-                    paper.status = paperStatus.REVIEWED;
+                    paper.accepting_reviewers = paper.accepting_reviewers || [];
+                    paper.accepting_reviewers = paper.accepting_reviewers.filter(u => u.user_id != user.id)
+                    paper.finished_reviewers = paper.finished_reviewers || [];
+                    paper.finished_reviewers.push({user_id: user.id, username: user.username});
                     await paperRepository.save(paper);
+                    if (paper.finished_reviewers.length == paper.minimum_reviewers){
+                        paper.status = paperStatus.REVIEWED;
+                        await paperRepository.save(paper);
+                    }
                     return res.status(201).json({message: "Reviewed successfully!"});
                 } else {
                     return res.status(422).json({message: 'you can only mark a paper reviewed if only it is accepted and downloaded!'});
                 }
             }
 
-            if(action === 'reject') {
-                if(paper.status == paperStatus.PENDING || paper.status == paperStatus.ACCEPTED || paper.status == paperStatus.DOWNLOADED) {
+            if (action === 'reject') {
+                if (paper.status == paperStatus.PENDING || paper.status == paperStatus.ACCEPTED || paper.status == paperStatus.DOWNLOADED) {
                     paper.status = paperStatus.REJECTED;
                     paper.users = paper.users.filter(u => u.id != user.id)
+                    paper.accepting_reviewers = paper.accepting_reviewers || []
+                    paper.accepting_reviewers.filter(u => u.user_id != user.id)
                     await paperRepository.save(paper);
                     return res.status(201).json({message: "Rejected successfully!"});
                 }
