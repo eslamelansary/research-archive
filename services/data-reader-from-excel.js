@@ -28,11 +28,11 @@ async function readExcelFile(filePath) {
   }
 
 async function processData() {
-  const filePath = "services/classifier/dataset/Data.xlsx"; // Update with the path to your Excel file
+  const filePath = "dataset/Data.xlsx"; // Update with the path to your Excel file
   const data = await readExcelFile(filePath);
 
   // Save data to a JSON file
-  const jsonFilePath = "pre-processed-data-from-excel.json"; // Update with the desired output file path
+  const jsonFilePath = "dataset/model-data/pre-processed-data-from-excel.json"; // Update with the desired output file path
   fs.writeFile(jsonFilePath, JSON.stringify(data, null, 2), (err) => {
     if (err) {
       console.error("Error writing JSON file:", err);
@@ -42,5 +42,4 @@ async function processData() {
   });
 }
 
-// Call the function to process the data
-processData();
+module.exports = { processData }

@@ -24,10 +24,12 @@ createConnection()
     const userRoutes = require("./routes/userRoutes");
     const paperRoutes = require("./routes/paperRoutes");
     const topicRoutes = require("./routes/topicRoutes");
+    const modelRoutes = require("./routes/modelRoutes");
 
     app.use('/users', userRoutes);
     app.use('/papers', paperRoutes);
     app.use('/topics', topicRoutes);
+    app.use('/model', modelRoutes);
     app.use('/', (req, res) => {
         res.send("`Server is running!")
     })

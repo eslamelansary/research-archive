@@ -2,7 +2,7 @@ var natural = require('natural');
 var classifier = new natural.BayesClassifier();
 
 // Using External dataset
-const data = require("../../naiveBayesTrainedData.json");
+const data = require("../dataset/model-data/naiveBayesTrainedData.json");
 
 data.forEach(row => {
     row.values.forEach(value => {
