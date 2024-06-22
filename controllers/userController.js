@@ -30,7 +30,7 @@ const signin = async (req, res) => {
 
     try {
         const user = await userRepository.findOne({
-            select:{ id: true, username: true, password: true, role: true },
+            select: {id: true, username: true, password: true, role: true},
             where: {username}
         });
 
@@ -87,10 +87,23 @@ const deleteUser = async (req, res) => {
 
 const getUserWhere = async (req, res) => {
     const user = await userRepository.find({
-        where: { role: req.params.role },
+        where: {role: req.params.role},
         relations: ['papers', 'topics']
     });
     res.json(user);
+}
+
+const rateOfAcceptance = async (req, res) => {
+    const users = await userRepository.find({where: {role: 'reviewer'}});
+    users.forEach(user => {
+        if (user.total_assigned > 0) {
+            user.acceptance_rate = (user.total_accepted / user.total_assigned) * 100;
+            user.acceptance_rate = user.acceptance_rate.toString() + '%';
+        } else {
+            user.acceptance_rate = null;
+        }
+    });
+    res.json(users);
 }
 
 module.exports = {
@@ -101,5 +114,6 @@ module.exports = {
     getUserById,
     updateUser,
     deleteUser,
-    createUser
+    createUser,
+    rateOfAcceptance
 }

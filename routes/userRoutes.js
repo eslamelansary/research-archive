@@ -71,7 +71,7 @@ router.delete('/:id', async (req, res, next) => {
 
 router.post('/rate-of-acceptance', async (req, res, next) => {
     try {
-
+        await userController.rateOfAcceptance(req, res);
     } catch (e) {
         next(e);
     }
