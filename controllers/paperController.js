@@ -1,4 +1,4 @@
-const {getRepository} = require('typeorm');
+const {getRepository, Between} = require('typeorm');
 const User = require('../entity/User');
 const Paper = require('../entity/Paper');
 const Counter = require('../entity/Counter');
@@ -139,11 +139,26 @@ const deleteComment = async (req, res) => {
     await paperRepository.save(paper);
 };
 
+const findInDay = async (req, res) => {
+    const date = new Date(req.body.date);
+    const startOfDay = new Date(date.setUTCHours(0, 0, 0, 0));
+    const endOfDay = new Date(date.setUTCHours(23, 59, 59, 999));
+
+    const papers = await getRepository(Paper).find({
+        where: {
+            createdAt: Between(startOfDay, endOfDay),
+        }
+    });
+
+    res.status(200).json(papers);
+}
+
 module.exports = {
     uploadPaper,
     assignPaperToReviewer,
     getAllPapers,
     getPaperById,
     addComment,
-    deleteComment
+    deleteComment,
+    findInDay
 }
