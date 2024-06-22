@@ -256,10 +256,19 @@ const getMyPapersByTopic = async (req, res) => {
     const topicName = req.body.topicName;
     const userId = req.user.userId;
     const user = await userRepository.findOne({
-        where: { id: userId, topic: topicName },
+        where: { id: userId },
         relations: ['papers', 'topics']
     });
-    res.json(user);
+
+    const hasTopic = user.topics.some(topic => topic.name === topicName);
+
+    if (!hasTopic) {
+        return res.status(400).json({ message: `The user does not have access to the topic: ${topicName}` });
+    }
+
+    // const topicNames = user.topics.map(topic => topic.name);
+    const filteredPapers = user.papers.filter(paper => paper.topic === topicName);
+    res.json(filteredPapers);
 }
 
 module.exports = {
