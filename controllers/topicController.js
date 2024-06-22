@@ -62,7 +62,7 @@ const assignTopicToReviewer = async (req, res) => {
         await getRepository(User).save(user);
         res.status(201).json({message: "Assigned successfully"});
     } else {
-        res.status(422).json({message: 'User is not a reviewer or does not exist.'});
+       return res.status(422).json({message: 'User is not a reviewer or does not exist.'});
     }
 }
 

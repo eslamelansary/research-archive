@@ -67,10 +67,10 @@ const assignPaperToReviewer = async (req, res) => {
     if (user && user.role === 'reviewer') {
         const isExistingPaper = user.papers.find(p => p.id === paperId);
         if(isExistingPaper) {
-            res.status(422).json({message: 'paper already assigned to this reviewer!'});
+            return res.status(422).json({message: 'paper already assigned to this reviewer!'});
         }
         if(user.papers.length >= 3 && exception == false){
-            res.status(422).json({message: "You can not assign more than 3 papers to a user or Add an exception."})
+           return res.status(422).json({message: "You can not assign more than 3 papers to a user or Add an exception."})
         }
         const paper = await getRepository(Paper).findOne({ where: { id: +paperId } });
         user.papers.push(paper);
@@ -105,7 +105,7 @@ const addComment = async (req, res) => {
 
     const user = await getRepository(User).findOne({ where: { id: userId } });
     if(user?.role !== 'reviewer')
-        res.status(422).json({message: 'You cannot add a comment'});
+        return res.status(422).json({message: 'You cannot add a comment'});
 
     const paperRepository = getRepository(Paper);
     const paper = await paperRepository.findOne({
@@ -113,7 +113,7 @@ const addComment = async (req, res) => {
         where: { id: paperId } });
 
     if (!paper) {
-        res.status(404).json({ message: "Paper not found"});
+       return res.status(404).json({ message: "Paper not found"});
     }
     const counter = await getRepository(Counter).count();
     paper.comments = paper.comments || [];
@@ -135,7 +135,7 @@ const deleteComment = async (req, res) => {
     const paper = await paperRepository.findOne({ where: { id: +paperId } });
 
     if (!paper) {
-        res.status(404).json({message: 'Paper not found'});
+        return res.status(404).json({message: 'Paper not found'});
     }
 
     paper.comments = paper.comments || [];
