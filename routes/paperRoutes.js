@@ -100,4 +100,12 @@ router.post('/topics-statistics', async (req, res, next) => {
     }
 })
 
+
+router.post('/my-papers', async (req, res, next) => {
+    try {
+        await paperController.getMyPapersByTopic(req, res);
+    } catch (e) {
+        next(e);
+    }
+})
 module.exports = router;

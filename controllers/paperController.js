@@ -237,6 +237,8 @@ const takeAction = async (req, res) => {
                     paper.users = paper.users.filter(u => u.id != user.id)
                     paper.accepting_reviewers = paper.accepting_reviewers || []
                     paper.accepting_reviewers.filter(u => u.user_id != user.id)
+                    user.papers = paper.users.filter(p => p.id != paperId);
+                    await userRepository.save(user)
                     await paperRepository.save(paper);
                     return res.status(201).json({message: "Rejected successfully!"});
                 }
@@ -250,6 +252,16 @@ const takeAction = async (req, res) => {
     }
 }
 
+const getMyPapersByTopic = async (req, res) => {
+    const topicName = req.body.topicName;
+    const userId = req.user.userId;
+    const user = await userRepository.findOne({
+        where: { id: userId, topic: topicName },
+        relations: ['papers', 'topics']
+    });
+    res.json(user);
+}
+
 module.exports = {
     uploadPaper,
     assignPaperToReviewer,
@@ -259,5 +271,6 @@ module.exports = {
     deleteComment,
     findInDay,
     takeAction,
-    getTopicsNumber
+    getTopicsNumber,
+    getMyPapersByTopic
 }
