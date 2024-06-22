@@ -49,14 +49,17 @@ const signin = async (req, res) => {
 
 const getUsers = async (req, res) => {
     const userRepository = getRepository(User);
-    const users = await userRepository.find();
+    const users = await userRepository.find({
+        relations: ['papers', 'topics']
+    });
     res.json(users);
 };
 
 const getUserById = async (req, res) => {
     const userRepository = getRepository(User);
     const user = await userRepository.findOne({
-        where: {id: req.params.id}
+        where: {id: req.params.id},
+        relations: ['papers', 'topics']
     });
     res.json(user);
 };
@@ -91,7 +94,8 @@ const deleteUser = async (req, res) => {
 const getUserWhere = async (req, res) => {
     const userRepository = getRepository(User);
     const user = await userRepository.find({
-        where: { role: req.body.role }
+        where: { role: req.params.role },
+        relations: ['papers', 'topics']
     });
     res.json(user);
 }

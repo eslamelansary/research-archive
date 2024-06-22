@@ -28,7 +28,7 @@ router.post('/create', async (req, res, next) => {
     }
 });
 
-router.get('/roles', async (req, res, next) => {
+router.get('/roles/:role', async (req, res, next) => {
     try {
         await userController.getUserWhere(req, res);
     } catch (error) {
