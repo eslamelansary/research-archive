@@ -1,5 +1,6 @@
 const {getRepository} = require("typeorm");
 const Topic = require("../entity/Topic");
+const User = require("../entity/User");
 
 const add = async (req, res) => {
     const { name } = req.body;
@@ -42,6 +43,31 @@ const findAll = async (req, res) => {
     res.json(topics);
 }
 
+const assignTopicToReviewer = async (req, res) => {
+    const {userId, topicIds} = req.body;
+    const user = await getRepository(User).findOne({
+        where: {
+            id: userId
+        },
+        relations: ['topics']
+    });
+
+    if (user && user.role === 'reviewer') {
+        for(const id of topicIds) {
+            const topic = await getRepository(Topic).findOne({ where: { id } })
+            user.topics.push(topic);
+        }
+        await getRepository(User).save(user);
+        res.status(201).json({message: "Assigned successfully"});
+    } else {
+        res.status(422).json({message: 'User is not a reviewer or does not exist.'});
+    }
+}
+
+
 module.exports = {
-    add, deleteTopic, findAll
+    add,
+    deleteTopic,
+    findAll,
+    assignTopicToReviewer,
 }

@@ -28,4 +28,12 @@ router.get('/', async (req, res, next) => {
     }
 });
 
+router.post('/assign-reviewer', async (req, res, next) => {
+    try {
+        await topicController.assignTopicToReviewer(req, res)
+    } catch (error) {
+        next(error);
+    }
+})
+
 module.exports = router;

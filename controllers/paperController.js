@@ -1,9 +1,6 @@
 const {getRepository} = require('typeorm');
-const fs = require('fs');
-const path = require('path');
 const User = require('../entity/User');
 const Paper = require('../entity/Paper');
-const Paper_Reviewer = require("../entity/Paper_Reviewer");
 
 const paperStatus = {
     DOWNLOADED: 'downloaded',
@@ -57,27 +54,19 @@ const uploadPaper = async (req, res) => {
 };
 
 const assignPaperToReviewer = async (req, res) => {
-    const {userId, paperId} = req.body;
+    const { userId, paperId } = req.body;
     const user = await getRepository(User).findOne({
         where: {
             id: userId
-        }
+        },
+        relations: ['papers']
     });
 
     if (user && user.role === 'reviewer') {
-        // Create a new assignment
-        const assignment = {
-            assignedAt: new Date()
-        }
-        assignment.reviewer = user;
-        assignment.paper = await getRepository(Paper).findOne({
-            where: {
-                id: paperId
-            }
-        });
-
-        await getRepository(Paper_Reviewer).save(assignment);
-        res.status(201).json({message: "assigned successfully"});
+        const paper = await getRepository(Paper).findOne({ where: { id: paperId } });
+        user.papers.push(paper);
+        await getRepository(User).save(user);
+        res.status(201).json({message: "Assigned successfully"});
     } else {
         res.status(422).json({message: 'User is not a reviewer or does not exist.'});
     }

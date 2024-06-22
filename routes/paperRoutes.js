@@ -31,5 +31,5 @@ router.use(authenticateUser);
 router.post('/upload', upload.single('file'), paperController.uploadPaper);
 router.get('/:id', paperController.getPaperById)
 router.get('/', paperController.getAllPapers)
-router.post('/assign', paperController.assignPaperToReviewer);
+router.post('/assign-reviewer', paperController.assignPaperToReviewer);
 module.exports = router;
