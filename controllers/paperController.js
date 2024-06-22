@@ -236,7 +236,7 @@ const takeAction = async (req, res) => {
                     paper.status = paperStatus.REJECTED;
                     paper.users = paper.users.filter(u => u.id != user.id)
                     paper.accepting_reviewers = paper.accepting_reviewers || []
-                    paper.accepting_reviewers.filter(u => u.user_id != user.id)
+                    paper.accepting_reviewers = paper.accepting_reviewers.filter(u => u.user_id != user.id)
                     user.papers = paper.users.filter(p => p.id != paperId);
                     await userRepository.save(user)
                     await paperRepository.save(paper);
