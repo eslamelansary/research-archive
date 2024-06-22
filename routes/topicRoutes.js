@@ -36,4 +36,12 @@ router.post('/assign-reviewer', async (req, res, next) => {
     }
 })
 
+router.post('/reviewers-number', async (req, res, next) => {
+    try {
+        await topicController.reviewersEachTopic(req, res);
+    }catch (e) {
+        next(e);
+    }
+})
+
 module.exports = router;

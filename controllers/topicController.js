@@ -64,10 +64,24 @@ const assignTopicToReviewer = async (req, res) => {
     }
 }
 
+const reviewersEachTopic = async (req, res) => {
+    const topics = await topicRepository.find({
+        select: { users: true },
+        relations: ['users'],
+    });
+
+    const transformedTopics = topics.map(topic => ({
+        id: topic.id,
+        name: topic.name,
+        users: topic.users.length
+    }));
+    res.json(transformedTopics);
+}
 
 module.exports = {
     add,
     deleteTopic,
     findAll,
     assignTopicToReviewer,
+    reviewersEachTopic
 }

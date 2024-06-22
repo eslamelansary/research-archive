@@ -100,6 +100,18 @@ const getPaperById = async (req, res) => {
     res.json(paper);
 };
 
+const getTopicsNumber = async (req, res) => {
+    const result = await paperRepository
+        .createQueryBuilder()
+        .select('topic')  // Select the topic column
+        .addSelect('COUNT(id)', 'count')  // Count the number of papers per topic
+        .groupBy('topic')  // Group by the topic column
+        .getRawMany();  // Get raw results
+
+    // Send the response with the results
+    res.status(200).json(result);
+}
+
 const addComment = async (req, res) => {
     const paperId = +req.params.id;
     const userId = req.user.userId;
@@ -244,5 +256,6 @@ module.exports = {
     addComment,
     deleteComment,
     findInDay,
-    takeAction
+    takeAction,
+    getTopicsNumber
 }

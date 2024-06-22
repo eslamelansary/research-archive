@@ -92,4 +92,12 @@ router.post('/action/:action', async (req, res, next) => {
     }
 })
 
+router.post('/topics-statistics', async (req, res, next) => {
+    try {
+        await paperController.getTopicsNumber(req, res);
+    }catch (e) {
+        next(e);
+    }
+})
+
 module.exports = router;
