@@ -66,6 +66,9 @@ const assignPaperToReviewer = async (req, res) => {
     });
     const exception = req.body.exception;
     if (user && user.role === 'reviewer') {
+        const paper = await paperRepository.findOne({where: {id: +paperId}});
+        if(paper.status === paperStatus.REVIEWED)
+            return res.status(422).json({message: 'You cannot assign an already reviewed paper to a reviewer!'});
         const isExistingPaper = user.papers.find(p => p.id === paperId);
         if (isExistingPaper) {
             return res.status(422).json({message: 'paper already assigned to this reviewer!'});
@@ -73,7 +76,6 @@ const assignPaperToReviewer = async (req, res) => {
         if (user.papers.length >= 3 && exception == false) {
             return res.status(422).json({message: "You can not assign more than 3 papers to a user or Add an exception."})
         }
-        const paper = await paperRepository.findOne({where: {id: +paperId}});
         paper.status = paperStatus.PENDING;
         paper.updatedAt = new Date();
         await paperRepository.save(paper);
@@ -218,7 +220,7 @@ const takeAction = async (req, res) => {
                     paper.accepting_reviewers = paper.accepting_reviewers || []
                     paper.accepting_reviewers.push({user_id: user.id, username: user.username});
                     user.total_accepted++;
-                    await user.save(user);
+                    await userRepository.save(user);
                     await paperRepository.save(paper);
                     return res.status(201).json({message: "Accepted successfully!"});
                 } else {
