@@ -28,9 +28,8 @@ const upload = multer({
 });
 
 router.use(authenticateUser);
-router.post('/upload', async (req, res, next) => {
+router.post('/upload', upload.single('file'), async (req, res, next) => {
     try {
-        upload.single('file')
         await paperController.uploadPaper(req, res);
     } catch (err) {
         next(err);

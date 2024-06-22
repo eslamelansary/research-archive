@@ -45,6 +45,14 @@ module.exports = new EntitySchema({
         comments: {
             type: 'json',
             nullable: true,
+        },
+        minimum_reviewers: {
+            type: 'int',
+            default: 1
+        },
+        accepting_reviewers: {
+            type: 'int',
+            default: 0
         }
     },
     relations: {

@@ -44,7 +44,8 @@ const uploadPaper = async (req, res) => {
             topic: null,
             authorId: user.id,
             authorName: user.username,
-            status: paperStatus.PENDING
+            status: paperStatus.PENDING,
+            minimum_reviewers: +requestBody?.body || 1
         });
         await paperRepository.save(paper);
         res.status(201).json({message: 'Paper uploaded successfully'});
@@ -89,10 +90,6 @@ const getPaperById = async (req, res) => {
     });
     res.json(paper);
 };
-
-const takeAction = async (req, res) => {
-
-}
 
 const addComment = async (req, res) => {
     const paperId = +req.params.id;
@@ -151,6 +148,10 @@ const findInDay = async (req, res) => {
     });
 
     res.status(200).json(papers);
+}
+
+const takeAction = async (req, res) => {
+
 }
 
 module.exports = {
