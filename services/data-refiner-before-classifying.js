@@ -113,9 +113,7 @@ async function processPdfFile(filePath) {
   }
 }
 
-async function refine() {
-  const filePath = "services/classifier/dataset/testArticle.txt";
-
+async function refine(filePath) {
   // Determine file type and call appropriate function
   const fileExt = path.extname(filePath).toLowerCase();
   switch (fileExt) {

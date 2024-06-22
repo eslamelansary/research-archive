@@ -3,6 +3,8 @@ const path = require('path');
 const User = require('../entity/User');
 const Paper = require('../entity/Paper');
 const Counter = require('../entity/Counter');
+const classifier = require("../services/data-refiner-before-classifying");
+const {decideTopic} = require("../services/classifier.service");
 const paperRepository = getRepository(Paper);
 const userRepository = getRepository(User);
 const counterRepository = getRepository(Counter);
@@ -38,12 +40,14 @@ const uploadPaper = async (req, res) => {
         }
 
         const now = new Date();
+        const textData = await classifier.refine(file.path);
+        const topic = await decideTopic(textData);
         const paper = paperRepository.create({
             name: file.originalname,
             createdAt: now,
             updatedAt: now,
             filePath: file.originalname,
-            topic: null,
+            topic: topic?.key || null,
             authorId: user.id,
             authorName: user.username,
             status: paperStatus.PENDING,

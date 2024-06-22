@@ -17,7 +17,7 @@ async function decideTopic(sentences) {
         let hashMap = new Map();
         
         // Load the classifier asynchronously
-        const classifier = await loadClassifierAsync("naiveBayesTrainedData.json");
+        const classifier = await loadClassifierAsync("dataset/model-data/naiveBayesTrainedData.json");
 
         // Classify each sentence and update the map
         for (let line of sentences) {
