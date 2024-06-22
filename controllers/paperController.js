@@ -177,7 +177,7 @@ const takeAction = async (req, res) => {
     const user = await userRepository.findOneBy({id: req.user.userId});
     if (user.role === 'reviewer') {
         const action = req.params.action;
-        const paperId = +req.params.paperId;
+        const paperId = +req.body.paperId;
         const paper = await paperRepository.findOne({
             where: {id: paperId},
             relations: ['users']

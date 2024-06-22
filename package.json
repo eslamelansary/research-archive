@@ -26,6 +26,7 @@
     "nodemon": "^3.1.4",
     "path": "^0.12.7",
     "pdf-parse": "^1.1.1",
+    "stopwords": "^0.0.9",
     "typeorm": "^0.3.20",
     "util": "^0.12.5",
     "winston": "^3.13.0"
