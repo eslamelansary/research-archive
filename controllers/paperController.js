@@ -1,4 +1,5 @@
 const {getRepository, Between} = require('typeorm');
+const path = require('path');
 const User = require('../entity/User');
 const Paper = require('../entity/Paper');
 const Counter = require('../entity/Counter');
@@ -55,6 +56,17 @@ const uploadPaper = async (req, res) => {
         res.status(500).json({message: 'Internal Server Error'});
     }
 };
+
+const downloadPaper = async (req, res) => {
+        const fileName = req.params.fileName;
+        const filePath = path.join(__dirname, '..', 'uploads', fileName);
+        res.download(filePath, (err) => {
+            if (err) {
+                console.error('Error downloading file:', err);
+                return res.status(404).send('File not found');
+            }
+        });
+}
 
 const assignPaperToReviewer = async (req, res) => {
     const {userId, paperId} = req.body;
@@ -280,6 +292,7 @@ const takeAction = async (req, res) => {
 
 module.exports = {
     uploadPaper,
+    downloadPaper,
     assignPaperToReviewer,
     getAllPapers,
     getPaperById,

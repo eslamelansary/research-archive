@@ -79,7 +79,7 @@ router.delete('/comment/:paperId/:commentId', async (req, res, next) => {
 router.post('/date', async (req, res, next) => {
     try {
         await paperController.findInDay(req, res);
-    }catch (e) {
+    } catch (e) {
         next(e);
     }
 })
@@ -87,7 +87,7 @@ router.post('/date', async (req, res, next) => {
 router.post('/action/:action', async (req, res, next) => {
     try {
         await paperController.takeAction(req, res);
-    }catch (e) {
+    } catch (e) {
         next(e);
     }
 })
@@ -95,9 +95,17 @@ router.post('/action/:action', async (req, res, next) => {
 router.post('/topics-statistics', async (req, res, next) => {
     try {
         await paperController.getTopicsNumber(req, res);
-    }catch (e) {
+    } catch (e) {
         next(e);
     }
 })
+
+router.post('/download/:fileName', async (req, res, next) => {
+    try {
+        await paperController.downloadPaper(req, res);
+    } catch (e) {
+        next(e);
+    }
+});
 
 module.exports = router;
