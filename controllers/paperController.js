@@ -119,6 +119,7 @@ const addComment = async (req, res) => {
     });
     await paperRepository.save(paper);
     await getRepository(Counter).insert({});
+    res.status(201).json({message: "Comment added"})
 };
 
 const deleteComment = async (req, res) => {
