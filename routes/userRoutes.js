@@ -22,7 +22,8 @@ router.post('/signin', async (req, res, next) => {
 router.use(authenticateUser);
 router.post('/create', async (req, res, next) => {
     try {
-        await userController.createUser(req, res);
+        await userController.createUser(req.body,req, res);
+        res.status(201).json({message: "User created successfully"})
     } catch (error) {
         next(error);
     }
