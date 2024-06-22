@@ -10,7 +10,8 @@ const paperStatus = {
     DOWNLOADED: 'downloaded',
     PENDING: 'pending review',
     ACCEPTED: 'accepted',
-    REVIEWED: 'reviewed'
+    REVIEWED: 'reviewed',
+    REJECTED: 'rejected',
 }
 
 const uploadPaper = async (req, res) => {
@@ -73,8 +74,10 @@ const assignPaperToReviewer = async (req, res) => {
             return res.status(422).json({message: "You can not assign more than 3 papers to a user or Add an exception."})
         }
         const paper = await paperRepository.findOne({where: {id: +paperId}});
+        paper.status = paperStatus.PENDING;
+        await paperRepository.save(paper);
         user.papers.push(paper);
-        await getRepository(User).save(user);
+        await userRepository.save(user);
         res.status(201).json({message: "Assigned successfully"});
     } else {
         res.status(422).json({message: 'User is not a reviewer or does not exist.'});
@@ -160,11 +163,61 @@ const takeAction = async (req, res) => {
     const user = await userRepository.findOneBy({id: req.user.userId});
     if (user.role === 'reviewer') {
         const action = req.params.action;
-        if (action === 'accept'){
-            const paper = paperRepository.findOneBy({id: +req.body.paperId});
+        const paper = await paperRepository.findOne({
+            where: {id: +req.body.paperId},
+            relations: ['users']
+        });
+        if (!paper) {
+            return res.status(404).json({message: 'paper not found'});
+        }
+        if(paper.status === paperStatus.REVIEWED)
+            return res.status(422).json({ message: 'This paper has been reviewed!'});
+        const myPaper = paper.users.find(user => user.id === req.user.userId);
+        if (myPaper) {
+            if (action === 'accept') {
+                if (paper.status == paperStatus.PENDING || paper.status == paperStatus.REJECTED) {
+                    paper.status = paperStatus.ACCEPTED;
+                    await paperRepository.save(paper);
+                    return res.status(201).json({message: "Accepted successfully!"});
+                } else {
+                    return res.status(422).json({message: 'You cannot accept already accepted OR reviewed paper!'});
+                }
+            }
+
+            if (action === 'download') {
+                if (paper.status == paperStatus.ACCEPTED) {
+                    paper.status = paperStatus.DOWNLOADED;
+                    await paperRepository.save(paper);
+                    return res.status(201).json({message: "Reviewed successfully!"});
+                } else {
+                    return res.status(422).json({message: 'you can only download a paper if you have accepted it!'});
+                }
+            }
+
+            if (action === 'review') {
+                if (paper.status == paperStatus.DOWNLOADED) {
+                    paper.status = paperStatus.REVIEWED;
+                    await paperRepository.save(paper);
+                    return res.status(201).json({message: "Reviewed successfully!"});
+                } else {
+                    return res.status(422).json({message: 'you can only mark a paper reviewed if only it is accepted and downloaded!'});
+                }
+            }
+
+            if(action === 'reject') {
+                if(paper.status == paperStatus.PENDING || paper.status == paperStatus.ACCEPTED || paper.status == paperStatus.DOWNLOADED) {
+                    paper.status = paperStatus.REJECTED;
+                    paper.users = paper.users.filter(u => u.id != user.id)
+                    await paperRepository.save(paper);
+                    return res.status(201).json({message: "Rejected successfully!"});
+                }
+            }
+
+        } else {
+            return res.status(422).json({message: "you cannot take action on paper assigned to another reviewer!"});
         }
     } else {
-        res.status(422).json({message: "You cannot take action on paper!"});
+        return res.status(422).json({message: "You cannot take action on paper!"});
     }
 }
 

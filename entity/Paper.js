@@ -3,7 +3,8 @@ const paperStatus = {
     DOWNLOADED: 'downloaded',
     PENDING: 'pending review',
     ACCEPTED: 'accepted',
-    REVIEWED: 'reviewed'
+    REVIEWED: 'reviewed',
+    REJECTED: 'rejected',
 }
 
 module.exports = new EntitySchema({
