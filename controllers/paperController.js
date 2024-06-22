@@ -1,6 +1,7 @@
 const {getRepository} = require('typeorm');
 const User = require('../entity/User');
 const Paper = require('../entity/Paper');
+const Counter = require('../entity/Counter');
 
 const paperStatus = {
     DOWNLOADED: 'downloaded',
@@ -57,13 +58,13 @@ const assignPaperToReviewer = async (req, res) => {
     const { userId, paperId } = req.body;
     const user = await getRepository(User).findOne({
         where: {
-            id: userId
+            id: +userId
         },
         relations: ['papers']
     });
 
     if (user && user.role === 'reviewer') {
-        const paper = await getRepository(Paper).findOne({ where: { id: paperId } });
+        const paper = await getRepository(Paper).findOne({ where: { id: +paperId } });
         user.papers.push(paper);
         await getRepository(User).save(user);
         res.status(201).json({message: "Assigned successfully"});
@@ -74,21 +75,75 @@ const assignPaperToReviewer = async (req, res) => {
 
 const getAllPapers = async (req, res) => {
     const paperRepository = getRepository(Paper);
-    const papers = await paperRepository.find();
+    const papers = await paperRepository.find({
+        relations: ['users']
+    });
     res.json(papers);
 };
 
 const getPaperById = async (req, res) => {
     const paperRepository = getRepository(Paper);
     const paper = await paperRepository.findOne({
-        where: {id: req.params.id}
+        where: { id: +req.params.id },
+        relations: ['users']
     });
     res.json(paper);
+};
+
+const takeAction = async (req, res) => {
+
+}
+
+const addComment = async (req, res) => {
+    const paperId = +req.params.id;
+    const userId = req.user.userId;
+    const comment = req.body;
+
+    const user = await getRepository(User).findOne({ where: { id: userId } });
+    if(user?.role !== 'reviewer')
+        res.status(422).json({message: 'You cannot add a comment'});
+
+    const paperRepository = getRepository(Paper);
+    const paper = await paperRepository.findOne({
+        select: { id: true, comments: true },
+        where: { id: paperId } });
+
+    if (!paper) {
+        res.status(404).json({ message: "Paper not found"});
+    }
+    const counter = await getRepository(Counter).count();
+    paper.comments = paper.comments || [];
+    paper.comments.push({
+        id: counter + 1,
+        comment,
+        userId: user.id,
+        username: user.username,
+        createdAt: new Date(),
+    });
+    await paperRepository.save(paper);
+    await getRepository(Counter).insert({});
+};
+
+const deleteComment = async (req, res) => {
+    const { paperId, commentId } = req.params;
+    const paperRepository = getRepository(Paper);
+    const paper = await paperRepository.findOne({ where: { id: +paperId } });
+
+    if (!paper) {
+        res.status(404).json({message: 'Paper not found'});
+    }
+
+    paper.comments = paper.comments || [];
+    paper.comments = paper.comments.filter(c => c.id !== +commentId);
+
+    await paperRepository.save(paper);
 };
 
 module.exports = {
     uploadPaper,
     assignPaperToReviewer,
     getAllPapers,
-    getPaperById
+    getPaperById,
+    addComment,
+    deleteComment
 }

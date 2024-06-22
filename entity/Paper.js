@@ -41,6 +41,21 @@ module.exports = new EntitySchema({
             type: 'enum',
             enum: Object.values(paperStatus),
             default: paperStatus.PENDING
+        },
+        comments: {
+            type: 'json',
+            nullable: true,
         }
+    },
+    relations: {
+        users: {
+            type: 'many-to-many',
+            target: 'User',
+            joinTable: {
+                name: 'paper_reviewer', // Join table name
+                inverseJoinColumn: { name: 'userId', referencedColumnName: 'id' },
+                joinColumn: { name: 'paperId', referencedColumnName: 'id' }
+            }
+        },
     }
 });

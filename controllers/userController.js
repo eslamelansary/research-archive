@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 const {getRepository} = require('typeorm');
 const User = require('../entity/User');
 
-async function createUser(userData, req, res) {
+const createUser = async (userData, req, res) => {
     const userRepository = getRepository(User);
     const {username, password, role} = userData;
     // Check if the username already exists
@@ -16,7 +16,7 @@ async function createUser(userData, req, res) {
     // Create the user
     const newUser = userRepository.create({username, password: hashedPassword, role});
     await userRepository.save(newUser);
-}
+};
 
 const signup = async (req, res) => {
     const authorData = req.body;

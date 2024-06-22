@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const paperController = require('../controllers/paperController');
 const multer = require('multer');
-const { authenticateUser } = require("../middlewares/authMiddleware");
+const {authenticateUser} = require("../middlewares/authMiddleware");
 
 // Multer configuration to handle file uploads and validate file types
 const storage = multer.diskStorage({
@@ -22,14 +22,59 @@ const fileFilter = (req, file, cb) => {
     }
 };
 
-const upload = multer({ 
+const upload = multer({
     storage: storage,
     fileFilter: fileFilter
 });
 
 router.use(authenticateUser);
-router.post('/upload', upload.single('file'), paperController.uploadPaper);
-router.get('/:id', paperController.getPaperById)
-router.get('/', paperController.getAllPapers)
-router.post('/assign-reviewer', paperController.assignPaperToReviewer);
+router.post('/upload', async (req, res, next) => {
+    try {
+        upload.single('file')
+        await paperController.uploadPaper(req, res);
+    } catch (err) {
+        next(err);
+    }
+});
+
+router.get('/:id', async (req, res, next) => {
+    try {
+        await paperController.getPaperById(req, res);
+    } catch (err) {
+        next(err);
+    }
+})
+
+router.get('/', async (req, res, next) => {
+    try {
+        await paperController.getAllPapers(req, res);
+    } catch (e) {
+        next(e);
+    }
+})
+
+router.post('/assign-reviewer', async (req, res, next) => {
+    try {
+        await paperController.assignPaperToReviewer(req, res);
+    } catch (err) {
+        next(err);
+    }
+});
+
+router.post('/comment/:id', async (req, res, next) => {
+    try {
+        await paperController.addComment(req, res);
+    } catch (e) {
+        next(e);
+    }
+});
+
+router.delete('/comment/:paperId/:commentId', async (req, res, next) => {
+    try {
+        await paperController.deleteComment(req, res);
+    } catch (e) {
+        next(e);
+    }
+});
+
 module.exports = router;

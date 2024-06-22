@@ -14,5 +14,16 @@ module.exports = new EntitySchema({
             unique: true,
             nullable: false
         },
+    },
+    relations: {
+        users: {
+            type: 'many-to-many',
+            target: 'User',
+            joinTable: {
+                name: 'topic_reviewer', // Join table name
+                inverseJoinColumn: { name: 'userId', referencedColumnName: 'id' },
+                joinColumn: { name: 'topicId', referencedColumnName: 'id' }
+            }
+        },
     }
 });

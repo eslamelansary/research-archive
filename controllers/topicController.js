@@ -39,7 +39,9 @@ const deleteTopic = async (req, res) => {
 
 const findAll = async (req, res) => {
     const topicRepository = getRepository(Topic);
-    const topics = await topicRepository.find();
+    const topics = await topicRepository.find({
+        relations: ['users']
+    });
     res.json(topics);
 }
 
