@@ -84,7 +84,7 @@ router.post('/date', async (req, res, next) => {
     }
 })
 
-router.post('/action/:action', async (req, res, next) => {
+router.post('/action/:action/:paperId', async (req, res, next) => {
     try {
         await paperController.takeAction(req, res);
     }catch (e) {
