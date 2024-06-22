@@ -63,8 +63,15 @@ const assignPaperToReviewer = async (req, res) => {
         },
         relations: ['papers']
     });
-
+    const exception = req.body.exception;
     if (user && user.role === 'reviewer') {
+        const isExistingPaper = user.papers.find(p => p.id === paperId);
+        if(isExistingPaper) {
+            res.status(422).json({message: 'paper already assigned to this reviewer!'});
+        }
+        if(user.papers.length >= 3 && exception == false){
+            res.status(422).json({message: "You can not assign more than 3 papers to a user or Add an exception."})
+        }
         const paper = await getRepository(Paper).findOne({ where: { id: +paperId } });
         user.papers.push(paper);
         await getRepository(User).save(user);
