@@ -84,4 +84,12 @@ router.post('/date', async (req, res, next) => {
     }
 })
 
+router.post('/action/:action', async (req, res, next) => {
+    try {
+        await paperController.takeAction(req, res);
+    }catch (e) {
+        next(e);
+    }
+})
+
 module.exports = router;

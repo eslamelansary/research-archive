@@ -1,10 +1,11 @@
 const {getRepository} = require("typeorm");
 const Topic = require("../entity/Topic");
 const User = require("../entity/User");
+const topicRepository = getRepository(Topic);
+const userRepository = getRepository(User);
 
 const add = async (req, res) => {
     const { name } = req.body;
-    const topicRepository = getRepository(Topic);
 
     // Check if the topicname already exists
     const existingTopic = await topicRepository.findOne({
@@ -21,8 +22,6 @@ const add = async (req, res) => {
 }
 
 const deleteTopic = async (req, res) => {
-    const topicRepository = getRepository(Topic);
-
     // Find the topic by ID
     const topic = await topicRepository.findOne({
         where: {id: req.params.id}
@@ -38,7 +37,6 @@ const deleteTopic = async (req, res) => {
 };
 
 const findAll = async (req, res) => {
-    const topicRepository = getRepository(Topic);
     const topics = await topicRepository.find({
         relations: ['users']
     });
@@ -47,7 +45,7 @@ const findAll = async (req, res) => {
 
 const assignTopicToReviewer = async (req, res) => {
     const {userId, topicIds} = req.body;
-    const user = await getRepository(User).findOne({
+    const user = await userRepository.findOne({
         where: {
             id: userId
         },
@@ -56,10 +54,10 @@ const assignTopicToReviewer = async (req, res) => {
 
     if (user && user.role === 'reviewer') {
         for(const id of topicIds) {
-            const topic = await getRepository(Topic).findOne({ where: { id } })
+            const topic = await topicRepository.findOne({ where: { id } })
             user.topics.push(topic);
         }
-        await getRepository(User).save(user);
+        await userRepository.save(user);
         res.status(201).json({message: "Assigned successfully"});
     } else {
        return res.status(422).json({message: 'User is not a reviewer or does not exist.'});

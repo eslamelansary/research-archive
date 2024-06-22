@@ -2,10 +2,14 @@ const {getRepository, Between} = require('typeorm');
 const User = require('../entity/User');
 const Paper = require('../entity/Paper');
 const Counter = require('../entity/Counter');
+const paperRepository = getRepository(Paper);
+const userRepository = getRepository(User);
+const counterRepository = getRepository(Counter);
 
 const paperStatus = {
     DOWNLOADED: 'downloaded',
     PENDING: 'pending review',
+    ACCEPTED: 'accepted',
     REVIEWED: 'reviewed'
 }
 
@@ -16,10 +20,6 @@ const uploadPaper = async (req, res) => {
         if (!file) {
             return res.status(400).json({message: 'No file uploaded'});
         }
-
-        // Retrieve necessary repositories
-        const paperRepository = getRepository(Paper);
-        const userRepository = getRepository(User);
 
         // Extract data from request body
         const requestBody = req.body;
@@ -56,8 +56,8 @@ const uploadPaper = async (req, res) => {
 };
 
 const assignPaperToReviewer = async (req, res) => {
-    const { userId, paperId } = req.body;
-    const user = await getRepository(User).findOne({
+    const {userId, paperId} = req.body;
+    const user = await userRepository.findOne({
         where: {
             id: +userId
         },
@@ -66,13 +66,13 @@ const assignPaperToReviewer = async (req, res) => {
     const exception = req.body.exception;
     if (user && user.role === 'reviewer') {
         const isExistingPaper = user.papers.find(p => p.id === paperId);
-        if(isExistingPaper) {
+        if (isExistingPaper) {
             return res.status(422).json({message: 'paper already assigned to this reviewer!'});
         }
-        if(user.papers.length >= 3 && exception == false){
-           return res.status(422).json({message: "You can not assign more than 3 papers to a user or Add an exception."})
+        if (user.papers.length >= 3 && exception == false) {
+            return res.status(422).json({message: "You can not assign more than 3 papers to a user or Add an exception."})
         }
-        const paper = await getRepository(Paper).findOne({ where: { id: +paperId } });
+        const paper = await paperRepository.findOne({where: {id: +paperId}});
         user.papers.push(paper);
         await getRepository(User).save(user);
         res.status(201).json({message: "Assigned successfully"});
@@ -82,7 +82,6 @@ const assignPaperToReviewer = async (req, res) => {
 }
 
 const getAllPapers = async (req, res) => {
-    const paperRepository = getRepository(Paper);
     const papers = await paperRepository.find({
         relations: ['users']
     });
@@ -90,9 +89,8 @@ const getAllPapers = async (req, res) => {
 };
 
 const getPaperById = async (req, res) => {
-    const paperRepository = getRepository(Paper);
     const paper = await paperRepository.findOne({
-        where: { id: +req.params.id },
+        where: {id: +req.params.id},
         relations: ['users']
     });
     res.json(paper);
@@ -103,19 +101,20 @@ const addComment = async (req, res) => {
     const userId = req.user.userId;
     const comment = req.body;
 
-    const user = await getRepository(User).findOne({ where: { id: userId } });
-    if(user?.role !== 'reviewer')
+    const user = await userRepository.findOne({where: {id: userId}});
+    if (user?.role !== 'reviewer')
         return res.status(422).json({message: 'You cannot add a comment'});
 
-    const paperRepository = getRepository(Paper);
     const paper = await paperRepository.findOne({
-        select: { id: true, comments: true },
-        where: { id: paperId } });
+        select: {id: true, comments: true},
+        where: {id: paperId}
+    });
 
     if (!paper) {
-       return res.status(404).json({ message: "Paper not found"});
+        return res.status(404).json({message: "Paper not found"});
     }
-    const counter = await getRepository(Counter).count();
+
+    const counter = await counterRepository.count();
     paper.comments = paper.comments || [];
     paper.comments.push({
         id: counter + 1,
@@ -125,14 +124,13 @@ const addComment = async (req, res) => {
         createdAt: new Date(),
     });
     await paperRepository.save(paper);
-    await getRepository(Counter).insert({});
+    await counterRepository.insert({});
     res.status(201).json({message: "Comment added"})
 };
 
 const deleteComment = async (req, res) => {
-    const { paperId, commentId } = req.params;
-    const paperRepository = getRepository(Paper);
-    const paper = await paperRepository.findOne({ where: { id: +paperId } });
+    const {paperId, commentId} = req.params;
+    const paper = await paperRepository.findOne({where: {id: +paperId}});
 
     if (!paper) {
         return res.status(404).json({message: 'Paper not found'});
@@ -149,7 +147,7 @@ const findInDay = async (req, res) => {
     const startOfDay = new Date(date.setUTCHours(0, 0, 0, 0));
     const endOfDay = new Date(date.setUTCHours(23, 59, 59, 999));
 
-    const papers = await getRepository(Paper).find({
+    const papers = await paperRepository.find({
         where: {
             createdAt: Between(startOfDay, endOfDay),
         }
@@ -159,7 +157,15 @@ const findInDay = async (req, res) => {
 }
 
 const takeAction = async (req, res) => {
-
+    const user = await userRepository.findOneBy({id: req.user.userId});
+    if (user.role === 'reviewer') {
+        const action = req.params.action;
+        if (action === 'accept'){
+            const paper = paperRepository.findOneBy({id: +req.body.paperId});
+        }
+    } else {
+        res.status(422).json({message: "You cannot take action on paper!"});
+    }
 }
 
 module.exports = {
@@ -169,5 +175,6 @@ module.exports = {
     getPaperById,
     addComment,
     deleteComment,
-    findInDay
+    findInDay,
+    takeAction
 }

@@ -2,9 +2,9 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const {getRepository} = require('typeorm');
 const User = require('../entity/User');
+const userRepository = getRepository(User);
 
 const createUser = async (userData, req, res) => {
-    const userRepository = getRepository(User);
     const {username, password, role} = userData;
     // Check if the username already exists
     const existingUser = await userRepository.findOne({where: {username}});
@@ -26,7 +26,6 @@ const signup = async (req, res) => {
 };
 
 const signin = async (req, res) => {
-    const userRepository = getRepository(User);
     const {username, password} = req.body;
 
     try {
@@ -48,7 +47,6 @@ const signin = async (req, res) => {
 };
 
 const getUsers = async (req, res) => {
-    const userRepository = getRepository(User);
     const users = await userRepository.find({
         relations: ['papers', 'topics']
     });
@@ -56,7 +54,6 @@ const getUsers = async (req, res) => {
 };
 
 const getUserById = async (req, res) => {
-    const userRepository = getRepository(User);
     const user = await userRepository.findOne({
         where: {id: req.params.id},
         relations: ['papers', 'topics']
@@ -65,7 +62,6 @@ const getUserById = async (req, res) => {
 };
 
 const updateUser = async (req, res) => {
-    const userRepository = getRepository(User);
     const user = await userRepository.findOne({
         where: {id: req.params.id}
     });
@@ -75,8 +71,6 @@ const updateUser = async (req, res) => {
 };
 
 const deleteUser = async (req, res) => {
-    const userRepository = getRepository(User);
-
     // Find the user by ID
     const user = await userRepository.findOne({
         where: {id: req.params.id}
@@ -92,7 +86,6 @@ const deleteUser = async (req, res) => {
 };
 
 const getUserWhere = async (req, res) => {
-    const userRepository = getRepository(User);
     const user = await userRepository.find({
         where: { role: req.params.role },
         relations: ['papers', 'topics']
