@@ -159,14 +159,15 @@ const deleteComment = async (req, res) => {
 };
 
 const findInDay = async (req, res) => {
-    const date = new Date(req.body.date);
+    const date = new Date(req.body.date); //2024-02-05
     const startOfDay = new Date(date.setUTCHours(0, 0, 0, 0));
     const endOfDay = new Date(date.setUTCHours(23, 59, 59, 999));
 
     const papers = await paperRepository.find({
         where: {
             createdAt: Between(startOfDay, endOfDay),
-        }
+        },
+        relations: ['users'],
     });
 
     res.status(200).json(papers);
