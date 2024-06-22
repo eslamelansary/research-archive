@@ -263,6 +263,7 @@ const takeAction = async (req, res) => {
                     paper.accepting_reviewers = paper.accepting_reviewers.filter(u => u.user_id != user.id)
                     user.papers = paper.users.filter(p => p.id != paperId);
                     user.total_rejected++;
+                    user.total_accepted--;
                     await userRepository.save(user)
                     await paperRepository.save(paper);
                     return res.status(201).json({message: "Rejected successfully!"});
