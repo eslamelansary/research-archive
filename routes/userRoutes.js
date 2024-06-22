@@ -69,4 +69,11 @@ router.delete('/:id', async (req, res, next) => {
     }
 });
 
+router.post('/rate-of-acceptance', async (req, res, next) => {
+    try {
+
+    } catch (e) {
+        next(e);
+    }
+})
 module.exports = router;

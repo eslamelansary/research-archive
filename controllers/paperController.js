@@ -89,8 +89,8 @@ const assignPaperToReviewer = async (req, res) => {
 }
 
 const getAllPapers = async (req, res) => {
-    const topicName = req.body.topicName;
-    if(topicName.length != 0) {
+    const topicName = req?.body?.topicName;
+    if(topicName) {
         const userId = req.user.userId;
         const user = await userRepository.findOne({
             where: { id: userId },
