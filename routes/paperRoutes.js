@@ -100,7 +100,7 @@ router.post('/topics-statistics', async (req, res, next) => {
     }
 })
 
-router.post('/download/:fileName', async (req, res, next) => {
+router.post('/download', async (req, res, next) => {
     try {
         await paperController.downloadPaper(req, res);
     } catch (e) {

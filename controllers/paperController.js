@@ -62,7 +62,7 @@ const uploadPaper = async (req, res) => {
 };
 
 const downloadPaper = async (req, res) => {
-        const fileName = req.params.fileName;
+        const fileName = req.body.fileName;
         const filePath = path.join(__dirname, '..', 'uploads', fileName);
         res.download(filePath, (err) => {
             if (err) {
