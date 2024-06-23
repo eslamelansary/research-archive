@@ -97,7 +97,7 @@ const rateOfAcceptance = async (req, res) => {
     const users = await userRepository.find({where: {role: 'reviewer'}});
     users.forEach(user => {
         if (user.total_assigned > 0) {
-            user.acceptance_rate = (user.total_accepted / user.total_assigned) * 100;
+            user.acceptance_rate = ((user.total_accepted / user.total_assigned) * 100).toFixed(2);
             user.acceptance_rate = user.acceptance_rate.toString() + '%';
         } else {
             user.acceptance_rate = null;
