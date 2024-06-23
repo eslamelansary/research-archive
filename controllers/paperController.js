@@ -123,6 +123,23 @@ const getAllPapers = async (req, res) => {
         res.json(filteredPapers);
     }
     else {
+        const userId = req.user.userId;
+        const user = await userRepository.findOne({
+            where: { id: userId },
+            relations: ['papers', 'topics']
+        });
+
+        // if(user.role === 'reviewer') {
+        //     const papers = await paperRepository.find({
+        //         relations: ['users']
+        //     });
+        //     if(papers.length > 0) {
+        //         const myPapers = papers[0]?.users.filter(u => u.id == user.id);
+        //         return res.json(myPapers);
+        //     }
+        //     return res.json([])
+        // }
+
         const papers = await paperRepository.find({
             relations: ['users']
         });
@@ -156,8 +173,8 @@ const addComment = async (req, res) => {
     const comment = req.body;
 
     const user = await userRepository.findOne({where: {id: userId}});
-    if (user?.role !== 'reviewer')
-        return res.status(422).json({message: 'You cannot add a comment'});
+    // if (user?.role !== 'reviewer')
+    //     return res.status(422).json({message: 'You cannot add a comment'});
 
     const paper = await paperRepository.findOne({
         select: {id: true, comments: true},
