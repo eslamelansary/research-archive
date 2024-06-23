@@ -26,6 +26,7 @@ const uploadPaper = async (req, res) => {
         }
 
         // Extract data from request body
+        //ALWAYS 2 Reviewers
         const requestBody = req.body;
         // Find topic and user
         const user = await userRepository.findOne({
@@ -175,8 +176,8 @@ const addComment = async (req, res) => {
     const comment = req.body;
 
     const user = await userRepository.findOne({where: {id: userId}});
-    // if (user?.role !== 'reviewer')
-    //     return res.status(422).json({message: 'You cannot add a comment'});
+    if (user?.role !== 'reviewer')
+        return res.status(422).json({message: 'You cannot add a comment'});
 
     const paper = await paperRepository.findOne({
         select: {id: true, comments: true},
@@ -249,7 +250,7 @@ const takeAction = async (req, res) => {
             if (action === 'accept') {
                 if (
                     (paper.status == paperStatus.PENDING || paper.status == paperStatus.REJECTED) ||
-                    (paper.status == paperStatus.ACCEPTED && paper.accepting_reviewers.length +1 < paper.minimum_reviewers)
+                    (paper.status == paperStatus.ACCEPTED && paper.accepting_reviewers.length +1 <= paper.minimum_reviewers)
                 ) {
                     paper.status = paperStatus.ACCEPTED;
                     paper.accepting_reviewers = paper.accepting_reviewers || []
@@ -291,7 +292,10 @@ const takeAction = async (req, res) => {
             }
 
             if (action === 'reject') {
-                if (paper.status == paperStatus.PENDING || paper.status == paperStatus.ACCEPTED || paper.status == paperStatus.DOWNLOADED) {
+                if (paper.status == paperStatus.DOWNLOADED)
+                    return res.status(422).json({message: "You can't reject a paper after downloading it" });
+
+                if (paper.status == paperStatus.PENDING || paper.status == paperStatus.ACCEPTED) {
                     paper.status = paperStatus.REJECTED;
                     paper.users = paper.users.filter(u => u.id != user.id)
                     paper.accepting_reviewers = paper.accepting_reviewers || []

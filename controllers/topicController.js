@@ -6,6 +6,9 @@ const userRepository = getRepository(User);
 
 const add = async (req, res) => {
     const { name } = req.body;
+    if(name.length == 0 ){
+        return res.status(422).json({message: "Invalid topic name"});
+    }
 
     // Check if the topicname already exists
     const existingTopic = await topicRepository.findOne({
@@ -51,7 +54,7 @@ const assignTopicToReviewer = async (req, res) => {
         },
         relations: ['topics']
     });
-
+    // ALREADY ASSIGNED TOPIC
     if (user && user.role === 'reviewer') {
         for(const id of topicIds) {
             const topic = await topicRepository.findOne({ where: { id } })
@@ -77,6 +80,8 @@ const reviewersEachTopic = async (req, res) => {
     }));
     res.json(transformedTopics);
 }
+
+// ADD TOPICS TO ME (reviewer)
 
 module.exports = {
     add,
