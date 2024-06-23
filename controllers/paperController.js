@@ -129,16 +129,18 @@ const getAllPapers = async (req, res) => {
             relations: ['papers', 'topics']
         });
 
-        // if(user.role === 'reviewer') {
-        //     const papers = await paperRepository.find({
-        //         relations: ['users']
-        //     });
-        //     if(papers.length > 0) {
-        //         const myPapers = papers[0]?.users.filter(u => u.id == user.id);
-        //         return res.json(myPapers);
-        //     }
-        //     return res.json([])
-        // }
+        if(user.role === 'reviewer') {
+            const papers = await paperRepository.find({
+                relations: ['users']
+            });
+            if(papers.length > 0) {
+                const myPapers = papers.filter(paper =>
+                    paper.users.some(user => user.id === userId)
+                );
+                return res.json(myPapers);
+            }
+            return res.json([])
+        }
 
         const papers = await paperRepository.find({
             relations: ['users']
