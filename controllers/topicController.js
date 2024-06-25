@@ -6,11 +6,10 @@ const userRepository = getRepository(User);
 
 const add = async (req, res) => {
     const { name } = req.body;
-    if(name.length == 0 ){
+    if(name.length == 0) {
         return res.status(422).json({message: "Invalid topic name"});
     }
 
-    // Check if the topicname already exists
     const existingTopic = await topicRepository.findOne({
         where: { name }
     });
@@ -25,7 +24,6 @@ const add = async (req, res) => {
 }
 
 const deleteTopic = async (req, res) => {
-    // Find the topic by ID
     const topic = await topicRepository.findOne({
         where: {id: req.params.id}
     });
@@ -34,7 +32,6 @@ const deleteTopic = async (req, res) => {
         return res.status(404).json({message: 'Topic name not found'});
     }
 
-    // Delete the topic
     await topicRepository.delete(topic.id);
     res.json({message: 'Topic deleted successfully'});
 };
@@ -54,14 +51,18 @@ const assignTopicToReviewer = async (req, res) => {
         },
         relations: ['topics']
     });
-    // ALREADY ASSIGNED TOPIC
+
+    if(user.topics.find(t => t.id == topicIds[0])){
+        return res.status(422).json({message: 'This topic is already assigned to this reviewer.'});
+    }
+
     if (user && user.role === 'reviewer') {
         for(const id of topicIds) {
             const topic = await topicRepository.findOne({ where: { id } })
             user.topics.push(topic);
         }
         await userRepository.save(user);
-        res.status(201).json({message: "Assigned successfully"});
+        return res.status(201).json({message: "Assigned successfully"});
     } else {
        return res.status(422).json({message: 'User is not a reviewer or does not exist.'});
     }
@@ -80,8 +81,6 @@ const reviewersEachTopic = async (req, res) => {
     }));
     res.json(transformedTopics);
 }
-
-// ADD TOPICS TO ME (reviewer)
 
 module.exports = {
     add,

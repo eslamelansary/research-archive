@@ -19,16 +19,11 @@ const paperStatus = {
 
 const uploadPaper = async (req, res) => {
     try {
-        // Check if a file was uploaded
         const file = req.file;
         if (!file) {
             return res.status(400).json({message: 'No file uploaded'});
         }
 
-        // Extract data from request body
-        //ALWAYS 2 Reviewers
-        const requestBody = req.body;
-        // Find topic and user
         const user = await userRepository.findOne({
             where: {
                 id: req.user.userId,
@@ -52,7 +47,7 @@ const uploadPaper = async (req, res) => {
             authorId: user.id,
             authorName: user.username,
             status: paperStatus.PENDING,
-            minimum_reviewers: +requestBody?.body || 1
+            minimum_reviewers: 2
         });
         await paperRepository.save(paper);
         res.status(201).json({message: 'Paper uploaded successfully'});
@@ -106,25 +101,36 @@ const assignPaperToReviewer = async (req, res) => {
 }
 
 const getAllPapers = async (req, res) => {
+    const userId = req.user.userId;
     const topicName = req?.body?.topicName;
+    const date = req?.body?.date ? new Date(req?.body?.date) : null ; //2024-02-05
+    const where = {};
+    if(date){
+        const startOfDay = new Date(date.setUTCHours(0, 0, 0, 0));
+        const endOfDay = new Date(date.setUTCHours(23, 59, 59, 999));
+        where['createdAt'] = Between(startOfDay, endOfDay);
+    }
+
     if(topicName) {
-        const userId = req.user.userId;
-        const user = await userRepository.findOne({
-            where: { id: userId },
-            relations: ['papers', 'topics']
+        const papers = await paperRepository.find({
+            where,
+            relations: ['users']
         });
 
-        const hasTopic = user.topics.some(topic => topic.name === topicName);
+        const userPapers = papers.filter(paper =>
+            paper.users.some(user => user.id == userId)
+        )
+
+        const hasTopic = userPapers.some(paper => paper.topic === topicName);
 
         if (!hasTopic) {
             return res.status(400).json({ message: `The user does not have access to the topic: ${topicName}` });
         }
 
-        const filteredPapers = user.papers.filter(paper => paper.topic === topicName);
+        const filteredPapers = userPapers.filter(paper => paper.topic == topicName);
         res.json(filteredPapers);
-    }
-    else {
-        const userId = req.user.userId;
+
+    } else {
         const user = await userRepository.findOne({
             where: { id: userId },
             relations: ['papers', 'topics']
@@ -132,20 +138,24 @@ const getAllPapers = async (req, res) => {
 
         if(user.role === 'reviewer') {
             const papers = await paperRepository.find({
+                where,
                 relations: ['users']
             });
+
             if(papers.length > 0) {
                 const myPapers = papers.filter(paper =>
                     paper.users.some(user => user.id === userId)
                 );
                 return res.json(myPapers);
             }
-            return res.json([])
+            return res.json([]);
         }
 
         const papers = await paperRepository.find({
+            where,
             relations: ['users']
         });
+
         res.json(papers);
     }
 };
@@ -215,21 +225,6 @@ const deleteComment = async (req, res) => {
 
     await paperRepository.save(paper);
 };
-
-const findInDay = async (req, res) => {
-    const date = new Date(req.body.date); //2024-02-05
-    const startOfDay = new Date(date.setUTCHours(0, 0, 0, 0));
-    const endOfDay = new Date(date.setUTCHours(23, 59, 59, 999));
-
-    const papers = await paperRepository.find({
-        where: {
-            createdAt: Between(startOfDay, endOfDay),
-        },
-        relations: ['users'],
-    });
-
-    res.status(200).json(papers);
-}
 
 const takeAction = async (req, res) => {
     const user = await userRepository.findOneBy({id: req.user.userId});
@@ -325,7 +320,6 @@ module.exports = {
     getPaperById,
     addComment,
     deleteComment,
-    findInDay,
     takeAction,
     getTopicsNumber,
 }

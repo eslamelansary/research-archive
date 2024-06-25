@@ -76,14 +76,6 @@ router.delete('/comment/:paperId/:commentId', async (req, res, next) => {
     }
 });
 
-router.post('/date', async (req, res, next) => {
-    try {
-        await paperController.findInDay(req, res);
-    } catch (e) {
-        next(e);
-    }
-})
-
 router.post('/action/:action', async (req, res, next) => {
     try {
         await paperController.takeAction(req, res);
