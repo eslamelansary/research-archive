@@ -15,7 +15,10 @@ const storage = multer.diskStorage({
 });
 
 const fileFilter = (req, file, cb) => {
-    if (file.mimetype === 'application/pdf' || file.mimetype === 'text/plain' || file.mimetype === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
+    const allowedExtensions = ['.pdf', '.txt', '.docx'];
+    const fileExtension = file.originalname.slice(-4).toLowerCase();
+    const isExtensionAllowed = allowedExtensions.some(ext => file.originalname.toLowerCase().endsWith(ext));
+    if(isExtensionAllowed) {
         cb(null, true);
     } else {
         cb(new Error('Invalid file type. Only PDF, TXT, and DOCX files are allowed.'), false);
@@ -28,14 +31,22 @@ const upload = multer({
 });
 
 router.use(authenticateUser);
-router.post('/upload', upload.single('file'), async (req, res, next) => {
-    try {
-        await paperController.uploadPaper(req, res);
-    } catch (err) {
-        next(err);
-    }
-});
+router.post('/upload', async (req, res, next) => {
+    upload.single('file')(req, res, async (err) => {
+        if (err) {
+            return res.status(422).json({ message: 'Invalid file type. Only PDF, TXT, and DOCX files are allowed.' });
+        }
+        if (!req.file) {
+            return res.status(422).json({ message: 'No file uploaded or invalid file type. Only PDF, TXT, and DOCX files are allowed.' });
+        }
 
+        try {
+            await paperController.uploadPaper(req, res);
+        } catch (err) {
+            next(err);
+        }
+    });
+});
 router.get('/:id', async (req, res, next) => {
     try {
         await paperController.getPaperById(req, res);
