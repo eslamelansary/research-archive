@@ -24,6 +24,18 @@ const uploadPaper = async (req, res) => {
             return res.status(400).json({message: 'No file uploaded'});
         }
 
+        const paperCheck = await paperRepository.find({
+            where: {
+                name: file.originalname
+            },
+            orWhere: {
+                filePath: file.originalname
+            }
+        })
+
+        if(paperCheck.length)
+            return res.status(422).json({message: "This paper already exists in our records!"});
+
         const user = await userRepository.findOne({
             where: {
                 id: req.user.userId,
@@ -58,14 +70,14 @@ const uploadPaper = async (req, res) => {
 };
 
 const downloadPaper = async (req, res) => {
-        const fileName = req.body.fileName;
-        const filePath = path.join(__dirname, '..', 'uploads', fileName);
-        res.download(filePath, (err) => {
-            if (err) {
-                console.error('Error downloading file:', err);
-                return res.status(404).send('File not found');
-            }
-        });
+    const fileName = req.body.fileName;
+    const filePath = path.join(__dirname, '..', 'uploads', fileName);
+    res.download(filePath, (err) => {
+        if (err) {
+            console.error('Error downloading file:', err);
+            return res.status(404).send('File not found');
+        }
+    });
 }
 
 const assignPaperToReviewer = async (req, res) => {
@@ -79,7 +91,7 @@ const assignPaperToReviewer = async (req, res) => {
     const exception = req.body.exception;
     if (user && user.role === 'reviewer') {
         const paper = await paperRepository.findOne({where: {id: +paperId}});
-        if(paper.status === paperStatus.REVIEWED)
+        if (paper.status === paperStatus.REVIEWED)
             return res.status(422).json({message: 'You cannot assign an already reviewed paper to a reviewer!'});
         const isExistingPaper = user.papers.find(p => p.id === paperId);
         if (isExistingPaper) {
@@ -103,15 +115,15 @@ const assignPaperToReviewer = async (req, res) => {
 const getAllPapers = async (req, res) => {
     const userId = req.user.userId;
     const topicName = req?.body?.topicName;
-    const date = req?.body?.date ? new Date(req?.body?.date) : null ; //2024-02-05
+    const date = req?.body?.date ? new Date(req?.body?.date) : null; //2024-02-05
     const where = {};
-    if(date){
+    if (date) {
         const startOfDay = new Date(date.setUTCHours(0, 0, 0, 0));
         const endOfDay = new Date(date.setUTCHours(23, 59, 59, 999));
         where['createdAt'] = Between(startOfDay, endOfDay);
     }
 
-    if(topicName) {
+    if (topicName) {
         const papers = await paperRepository.find({
             where,
             relations: ['users']
@@ -124,7 +136,7 @@ const getAllPapers = async (req, res) => {
         const hasTopic = userPapers.some(paper => paper.topic === topicName);
 
         if (!hasTopic) {
-            return res.status(400).json({ message: `The user does not have access to the topic: ${topicName}` });
+            return res.status(400).json({message: `The user does not have access to the topic: ${topicName}`});
         }
 
         const filteredPapers = userPapers.filter(paper => paper.topic == topicName);
@@ -132,17 +144,17 @@ const getAllPapers = async (req, res) => {
 
     } else {
         const user = await userRepository.findOne({
-            where: { id: userId },
+            where: {id: userId},
             relations: ['papers', 'topics']
         });
 
-        if(user.role === 'reviewer') {
+        if (user.role === 'reviewer') {
             const papers = await paperRepository.find({
                 where,
                 relations: ['users']
             });
 
-            if(papers.length > 0) {
+            if (papers.length > 0) {
                 const myPapers = papers.filter(paper =>
                     paper.users.some(user => user.id === userId)
                 );
@@ -171,12 +183,10 @@ const getPaperById = async (req, res) => {
 const getTopicsNumber = async (req, res) => {
     const result = await paperRepository
         .createQueryBuilder()
-        .select('topic')  // Select the topic column
-        .addSelect('COUNT(id)', 'count')  // Count the number of papers per topic
-        .groupBy('topic')  // Group by the topic column
-        .getRawMany();  // Get raw results
-
-    // Send the response with the results
+        .select('topic')
+        .addSelect('COUNT(id)', 'count')
+        .groupBy('topic')
+        .getRawMany();
     res.status(200).json(result);
 }
 
@@ -245,7 +255,7 @@ const takeAction = async (req, res) => {
             if (action === 'accept') {
                 if (
                     (paper.status == paperStatus.PENDING || paper.status == paperStatus.REJECTED) ||
-                    (paper.status == paperStatus.ACCEPTED && paper.accepting_reviewers.length +1 <= paper.minimum_reviewers)
+                    (paper.status == paperStatus.ACCEPTED && paper.accepting_reviewers.length + 1 <= paper.minimum_reviewers)
                 ) {
                     paper.status = paperStatus.ACCEPTED;
                     paper.accepting_reviewers = paper.accepting_reviewers || []
@@ -276,7 +286,7 @@ const takeAction = async (req, res) => {
                     paper.finished_reviewers = paper.finished_reviewers || [];
                     paper.finished_reviewers.push({user_id: user.id, username: user.username});
                     await paperRepository.save(paper);
-                    if (paper.finished_reviewers.length == paper.minimum_reviewers){
+                    if (paper.finished_reviewers.length == paper.minimum_reviewers) {
                         paper.status = paperStatus.REVIEWED;
                         await paperRepository.save(paper);
                     }
@@ -288,7 +298,7 @@ const takeAction = async (req, res) => {
 
             if (action === 'reject') {
                 if (paper.status == paperStatus.DOWNLOADED)
-                    return res.status(422).json({message: "You can't reject a paper after downloading it" });
+                    return res.status(422).json({message: "You can't reject a paper after downloading it"});
 
                 if (paper.status == paperStatus.PENDING || paper.status == paperStatus.ACCEPTED) {
                     paper.status = paperStatus.REJECTED;

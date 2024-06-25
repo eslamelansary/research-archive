@@ -36,6 +36,7 @@ router.post('/upload', async (req, res, next) => {
         if (err) {
             return res.status(422).json({ message: 'Invalid file type. Only PDF, TXT, and DOCX files are allowed.' });
         }
+
         if (!req.file) {
             return res.status(422).json({ message: 'No file uploaded or invalid file type. Only PDF, TXT, and DOCX files are allowed.' });
         }
