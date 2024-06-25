@@ -48,6 +48,7 @@ router.post('/upload', async (req, res, next) => {
         }
     });
 });
+
 router.get('/:id', async (req, res, next) => {
     try {
         await paperController.getPaperById(req, res);
