@@ -20,7 +20,7 @@ const add = async (req, res) => {
 
     const newTopic = topicRepository.create({ name });
     await topicRepository.save(newTopic);
-    res.status(201).json({message: 'Topic added successfully'});
+    return res.status(201).json({message: 'Topic added successfully'});
 }
 
 const deleteTopic = async (req, res) => {
@@ -33,14 +33,14 @@ const deleteTopic = async (req, res) => {
     }
 
     await topicRepository.delete(topic.id);
-    res.json({message: 'Topic deleted successfully'});
+    return res.json({message: 'Topic deleted successfully'});
 };
 
 const findAll = async (req, res) => {
     const topics = await topicRepository.find({
         relations: ['users']
     });
-    res.json(topics);
+    return res.json(topics);
 }
 
 const assignTopicToReviewer = async (req, res) => {
@@ -79,7 +79,7 @@ const reviewersEachTopic = async (req, res) => {
         name: topic.name,
         users: topic.users.length
     }));
-    res.json(transformedTopics);
+    return res.json(transformedTopics);
 }
 
 module.exports = {

@@ -59,10 +59,10 @@ module.exports = new EntitySchema({
             type: 'json',
             nullable: true
         },
-        finished_reviewers: {
-            type: 'json',
-            nullable: true
-        }
+        // finished_reviewers: {
+        //     type: 'json',
+        //     nullable: true
+        // }
     },
     relations: {
         users: {

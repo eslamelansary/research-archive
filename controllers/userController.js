@@ -51,7 +51,7 @@ const signin = async (req, res) => {
         }
 
         const token = jwt.sign({userId: user.id, role: user.role}, process.env.SECRET, {expiresIn: '24h'});
-        res.status(200).json({message: 'Logged in successfully', user, token});
+        return res.status(200).json({message: 'Logged in successfully', user, token});
     } catch (error) {
         console.error('Error during sign-in:', error);
         return res.status(500).json({message: 'Internal Server Error'});
@@ -62,7 +62,7 @@ const getUsers = async (req, res) => {
     const users = await userRepository.find({
         relations: ['papers', 'topics']
     });
-    res.json(users);
+    return res.json(users);
 };
 
 const getUserById = async (req, res) => {
@@ -70,7 +70,7 @@ const getUserById = async (req, res) => {
         where: {id: req.params.id},
         relations: ['papers', 'topics']
     });
-    res.json(user);
+    return res.json(user);
 };
 
 const updateUser = async (req, res) => {
@@ -79,7 +79,7 @@ const updateUser = async (req, res) => {
     });
     userRepository.merge(user, req.body);
     await userRepository.save(user);
-    res.json({message: 'User updated successfully'});
+    return res.json({message: 'User updated successfully'});
 };
 
 const deleteUser = async (req, res) => {
@@ -94,7 +94,7 @@ const deleteUser = async (req, res) => {
 
     // Delete the user
     await userRepository.delete(user.id);
-    res.json({message: 'User deleted successfully'});
+    return res.json({message: 'User deleted successfully'});
 };
 
 const getUserWhere = async (req, res) => {
@@ -102,7 +102,7 @@ const getUserWhere = async (req, res) => {
         where: {role: req.params.role},
         relations: ['papers', 'topics']
     });
-    res.json(user);
+    return res.json(user);
 }
 
 const rateOfAcceptance = async (req, res) => {
@@ -115,7 +115,7 @@ const rateOfAcceptance = async (req, res) => {
             user.acceptance_rate = null;
         }
     });
-    res.json(users);
+    return res.json(users);
 }
 
 module.exports = {
