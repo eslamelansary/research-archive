@@ -293,7 +293,7 @@ const takeAction = async (req, res) => {
                     }
 
                     if(paper.accepting_reviewers.length == 1 && paper.rejecting_reviewers.length == 1) {
-                        return res.status(422).json({message: "Reviewed successfully but now you should ask the editor to assign a third reviewer!"});
+                        return res.status(200).json({message: "Reviewed successfully but now you should ask the editor to assign a third reviewer!"});
                     }
 
                     return res.status(201).json({message: "Reviewed successfully!"});
@@ -318,7 +318,7 @@ const takeAction = async (req, res) => {
                     }
 
                     if(paper.accepting_reviewers.length == 1 && paper.rejecting_reviewers.length == 1) {
-                        return res.status(422).json({message: "Reviewed successfully but now you should ask the editor to assign a third reviewer!"});
+                        return res.status(200).json({message: "Reviewed successfully but now you should ask the editor to assign a third reviewer!"});
                     }
                     return res.status(201).json({message: "Rejected successfully!"});
                 } else {
