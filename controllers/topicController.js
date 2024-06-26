@@ -5,16 +5,6 @@ const topicRepository = getRepository(Topic);
 const userRepository = getRepository(User);
 
 const add = async (req, res) => {
-    const userId = req.user.userId;
-    const user = await userRepository.findOne({
-        where: {
-            id: userId
-        },
-        relations: ['topics']
-    });
-    if(user.role == 'reviewer') {
-        return res.status(422).json({message: "Not authorized to add topic!"});
-    }
     const { name } = req.body;
     if(name.length == 0) {
         return res.status(422).json({message: "Invalid topic name"});
