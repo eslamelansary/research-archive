@@ -4,6 +4,18 @@ const {getRepository} = require('typeorm');
 const User = require('../entity/User');
 const userRepository = getRepository(User);
 
+const adminSeeder = async () => {
+    const {username, password, role} = {username: 'admin', password: '12345678', role: 'editor'};
+    const existingUser = await userRepository.findOne({where: {username}});
+    if (existingUser) {
+        return console.log('Admin already exists');
+    }
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const newUser = userRepository.create({username, password: hashedPassword, role});
+    await userRepository.save(newUser);
+    return console.log('Admin seeded successfully');
+};
+
 const createUser = async (userData, req, res) => {
     const {username, password, role} = userData;
     // Check if the username already exists
@@ -115,5 +127,6 @@ module.exports = {
     updateUser,
     deleteUser,
     createUser,
-    rateOfAcceptance
+    rateOfAcceptance,
+    adminSeeder
 }
