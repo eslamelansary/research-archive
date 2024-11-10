@@ -1,0 +1,7 @@
+node_modules
+/shelf/
+/workspace.xml
+/httpRequests/
+/ormconfig.json
+ormconfig.json
+package-lock.json
